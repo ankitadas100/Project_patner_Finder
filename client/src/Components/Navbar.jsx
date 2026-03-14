@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+import { Link } from "react-router";
 const NAV_ITEMS = ["Home", "Services", "Projects", "About", "Contact"];
 
 export default function Navbar() {
@@ -16,6 +16,7 @@ export default function Navbar() {
   return (
     <div style={{ fontFamily: "'Rajdhani', sans-serif" }}>
       <style>{`
+      
         @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
 
         .nb-root {
@@ -387,7 +388,7 @@ export default function Navbar() {
           {/* Desktop Buttons */}
           <div className="nb-btns">
             <button className="nb-btn-login">Log In</button>
-            <button className="nb-btn-signup">Sign Up</button>
+           <Link to="/signup"> <button className="nb-btn-signup">Sign Up</button></Link>
           </div>
 
           {/* Hamburger */}
