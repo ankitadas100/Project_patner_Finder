@@ -363,6 +363,331 @@
   }
 }
 
+        /*Home page */
+         @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        .hero-bg-grad {
+          position: absolute; inset: 0; z-index: 0;
+          background:
+            radial-gradient(ellipse 70% 50% at 10% 20%, rgba(255,195,0,0.07) 0%, transparent 60%),
+            radial-gradient(ellipse 50% 60% at 90% 80%, rgba(255,140,0,0.05) 0%, transparent 60%),
+            radial-gradient(ellipse 40% 40% at 50% 50%, rgba(255,195,0,0.03) 0%, transparent 70%);
+        }
+
+        .hero-canvas {
+          position: absolute; inset: 0; z-index: 0;
+          width: 100%; height: 100%;
+        }
+
+        .hero-wrap {
+          position: relative; z-index: 1;
+          min-height: 100vh;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          align-items: center;
+          padding: 80px 80px 60px;
+          gap: 40px;
+          max-width: 1400px;
+          margin: 0 auto;
+        }
+
+        /* Left side */
+        .hero-left { display: flex; flex-direction: column; gap: 0; }
+
+        .hero-badge {
+          display: inline-flex; align-items: center; gap: 8px;
+          background: rgba(255,195,0,0.08);
+          border: 1px solid rgba(255,195,0,0.2);
+          border-radius: 100px;
+          padding: 6px 16px;
+          font-size: 12px; font-weight: 600;
+          color: #FFC300; letter-spacing: 0.12em; text-transform: uppercase;
+          margin-bottom: 24px; width: fit-content;
+          font-family: 'Rajdhani', sans-serif;
+        }
+
+        .hero-badge-dot {
+          width: 6px; height: 6px;
+          background: #FFC300; border-radius: 50%;
+          box-shadow: 0 0 8px #FFC300;
+          animation: badgePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes badgePulse {
+          0%, 100% { opacity: 1; box-shadow: 0 0 6px #FFC300; }
+          50% { opacity: 0.5; box-shadow: 0 0 14px #FFC300; }
+        }
+
+        .hero-title {
+          font-family: 'Rajdhani', sans-serif;
+          font-size: clamp(2.4rem, 4vw, 4rem);
+          font-weight: 700;
+          color: #fff;
+          line-height: 1.1;
+          letter-spacing: -0.01em;
+          margin-bottom: 20px;
+          text-transform: uppercase;
+        }
+
+        .hero-title-accent { color: #FFC300; text-shadow: 0 0 40px rgba(255,195,0,0.4); }
+
+        .hero-desc {
+          font-family: 'Inter', sans-serif;
+          font-size: 1.05rem;
+          color: rgba(255,255,255,0.48);
+          line-height: 1.7;
+          font-weight: 400;
+          margin-bottom: 36px;
+          max-width: 480px;
+        }
+
+        .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 44px; }
+
+        .btn-primary {
+          position: relative;
+          padding: 14px 30px;
+          background: #FFC300;
+          color: #111;
+          border: none; border-radius: 12px;
+          font-family: 'Rajdhani', sans-serif;
+          font-size: 1rem; font-weight: 700;
+          letter-spacing: 0.08em; text-transform: uppercase;
+          cursor: pointer; overflow: hidden;
+          transition: transform 0.25s ease, box-shadow 0.3s ease, background 0.3s;
+          box-shadow: 0 4px 24px rgba(255,195,0,0.35);
+        }
+        .btn-primary::before {
+          content: ''; position: absolute; top: 0; left: -100%;
+          width: 100%; height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+          transition: left 0.45s ease;
+        }
+        .btn-primary:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 8px 36px rgba(255,195,0,0.6); background: #ffe033; }
+        .btn-primary:hover::before { left: 100%; }
+        .btn-primary:active { transform: scale(0.97); }
+
+        .btn-glass {
+          position: relative;
+          padding: 14px 30px;
+          background: rgba(255,255,255,0.05);
+          color: #FFC300;
+          border: 1.5px solid rgba(255,195,0,0.35);
+          border-radius: 12px;
+          font-family: 'Rajdhani', sans-serif;
+          font-size: 1rem; font-weight: 600;
+          letter-spacing: 0.08em; text-transform: uppercase;
+          cursor: pointer; overflow: hidden;
+          backdrop-filter: blur(10px);
+          transition: all 0.3s ease;
+          box-shadow: inset 0 1px 0 rgba(255,195,0,0.1);
+        }
+        .btn-glass::before {
+          content: ''; position: absolute; inset: 0;
+          background: rgba(255,195,0,0.06);
+          transform: scaleX(0); transform-origin: left;
+          transition: transform 0.3s ease;
+          border-radius: 12px;
+        }
+        .btn-glass:hover { border-color: #FFC300; color: #fff; transform: translateY(-3px); box-shadow: 0 6px 24px rgba(255,195,0,0.2), inset 0 1px 0 rgba(255,195,0,0.2); }
+        .btn-glass:hover::before { transform: scaleX(1); }
+
+        .hero-features { display: flex; flex-direction: column; gap: 10px; }
+
+        .feature-item {
+          display: flex; align-items: center; gap: 10px;
+          font-family: 'Inter', sans-serif;
+          font-size: 0.88rem; color: rgba(255,255,255,0.45);
+          font-weight: 400;
+          transition: color 0.2s;
+        }
+        .feature-item:hover { color: rgba(255,255,255,0.7); }
+
+        .feature-dot {
+          width: 5px; height: 5px; border-radius: 50%;
+          background: #FFC300;
+          box-shadow: 0 0 6px rgba(255,195,0,0.6);
+          flex-shrink: 0;
+        }
+
+        /* Right side - 3D visual */
+        .hero-right {
+          display: flex; align-items: center; justify-content: center;
+          position: relative; height: 560px;
+        }
+
+        .visual-scene {
+          position: relative; width: 420px; height: 420px;
+          transition: transform 0.1s ease;
+        }
+
+        /* Central orb */
+        .orb-center {
+          position: absolute;
+          top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
+          width: 160px; height: 160px;
+          background: radial-gradient(circle at 35% 35%, rgba(255,220,80,0.9), rgba(255,140,0,0.6) 50%, rgba(180,80,0,0.3));
+          border-radius: 50%;
+          box-shadow:
+            0 0 60px rgba(255,195,0,0.5),
+            0 0 120px rgba(255,195,0,0.2),
+            inset 0 0 40px rgba(255,255,255,0.15);
+          animation: orbFloat 4s ease-in-out infinite;
+        }
+
+        .orb-center::after {
+          content: '';
+          position: absolute; inset: 12px;
+          border-radius: 50%;
+          background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), transparent 60%);
+        }
+
+        @keyframes orbFloat {
+          0%, 100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 60px rgba(255,195,0,0.5), 0 0 120px rgba(255,195,0,0.2); }
+          50% { transform: translate(-50%, -54%) scale(1.04); box-shadow: 0 0 80px rgba(255,195,0,0.7), 0 0 160px rgba(255,195,0,0.3); }
+        }
+
+        /* Orbit rings */
+        .orbit {
+          position: absolute; top: 50%; left: 50%;
+          border-radius: 50%;
+          border: 1px solid rgba(255,195,0,0.15);
+          transform: translate(-50%, -50%);
+        }
+
+        .orbit-1 { width: 240px; height: 240px; animation: orbitSpin1 8s linear infinite; border-color: rgba(255,195,0,0.2); }
+        .orbit-2 { width: 320px; height: 320px; animation: orbitSpin2 12s linear infinite; border-style: dashed; }
+        .orbit-3 { width: 400px; height: 400px; animation: orbitSpin1 18s linear infinite reverse; border-color: rgba(255,195,0,0.08); }
+
+        @keyframes orbitSpin1 { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes orbitSpin2 { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(-360deg); } }
+
+        /* Orbit nodes */
+        .orbit-node {
+          position: absolute;
+          width: 10px; height: 10px;
+          background: #FFC300;
+          border-radius: 50%;
+          box-shadow: 0 0 12px rgba(255,195,0,0.8);
+        }
+
+        /* Floating glass cards */
+        .float-card {
+          position: absolute;
+          background: rgba(255,255,255,0.04);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1px solid rgba(255,195,0,0.15);
+          border-radius: 14px;
+          padding: 14px 18px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .float-card:hover {
+          transform: translateY(-4px) !important;
+          box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 20px rgba(255,195,0,0.1), inset 0 1px 0 rgba(255,255,255,0.08);
+        }
+
+        .card-top-left {
+          top: 20px; left: -30px;
+          animation: floatCardA 5s ease-in-out infinite;
+        }
+        .card-top-right {
+          top: 10px; right: -20px;
+          animation: floatCardB 6s ease-in-out infinite 1s;
+        }
+        .card-bottom-left {
+          bottom: 40px; left: -20px;
+          animation: floatCardA 7s ease-in-out infinite 2s;
+        }
+        .card-bottom-right {
+          bottom: 20px; right: -30px;
+          animation: floatCardB 5.5s ease-in-out infinite 0.5s;
+        }
+
+        @keyframes floatCardA {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+        @keyframes floatCardB {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(10px); }
+        }
+
+        .card-label {
+          font-family: 'Rajdhani', sans-serif;
+          font-size: 11px; font-weight: 600;
+          color: rgba(255,195,0,0.6);
+          letter-spacing: 0.1em; text-transform: uppercase;
+          margin-bottom: 4px;
+        }
+        .card-value {
+          font-family: 'Rajdhani', sans-serif;
+          font-size: 18px; font-weight: 700;
+          color: #fff; letter-spacing: 0.02em;
+        }
+        .card-value span { color: #FFC300; }
+
+        .card-avatars { display: flex; gap: -4px; margin-bottom: 4px; }
+        .avatar {
+          width: 26px; height: 26px; border-radius: 50%;
+          border: 2px solid rgba(0,0,0,0.6);
+          margin-right: -6px;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 10px; font-weight: 700; color: #111;
+        }
+
+        .card-skill-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+        .skill-tag {
+          background: rgba(255,195,0,0.12);
+          border: 1px solid rgba(255,195,0,0.2);
+          border-radius: 6px;
+          padding: 2px 8px;
+          font-family: 'Rajdhani', sans-serif;
+          font-size: 10px; font-weight: 600;
+          color: #FFC300; letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .match-bar {
+          width: 100px; height: 4px;
+          background: rgba(255,255,255,0.08);
+          border-radius: 4px; margin-top: 6px; overflow: hidden;
+        }
+        .match-fill {
+          height: 100%; border-radius: 4px;
+          background: linear-gradient(90deg, #FFC300, #FF8C00);
+          box-shadow: 0 0 8px rgba(255,195,0,0.6);
+          animation: fillAnim 2s ease-in-out infinite alternate;
+        }
+        @keyframes fillAnim {
+          from { width: 70%; } to { width: 90%; }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+          .hero-wrap { grid-template-columns: 1fr; padding: 100px 40px 60px; }
+          .hero-right { height: 400px; }
+          .visual-scene { width: 340px; height: 340px; }
+          .orbit-3 { width: 320px; height: 320px; }
+          .card-top-left { left: 0; }
+          .card-bottom-right { right: 0; }
+        }
+        @media (max-width: 640px) {
+          .hero-wrap { padding: 90px 20px 50px; gap: 20px; }
+          .hero-title { font-size: 2rem; }
+          .hero-right { height: 320px; }
+          .visual-scene { width: 280px; height: 280px; }
+          .orbit-1 { width: 180px; height: 180px; }
+          .orbit-2 { width: 240px; height: 240px; }
+          .orbit-3 { width: 280px; height: 280px; }
+          .orb-center { width: 110px; height: 110px; }
+          .float-card { display: none; }
+          .hero-btns { flex-direction: column; }
+          .btn-primary, .btn-glass { width: 100%; }
+        }
 /* Signup1 page */
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
 
@@ -556,40 +881,9 @@
   box-shadow: 0 6px 20px rgba(255, 122, 0, .2);
 }
 
-.divline {
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .12), transparent);
-}
-
-.link {
-  color: #FF7A00;
-  cursor: pointer;
-  transition: color .2s;
-}
-
-.link:hover {
-  color: #FFC300;
-}
-
-/* loder style */
-.loader {
-  width: 18px;
-  height: 18px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-top: 3px solid white;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  display: inline-block;
-}
-
-/* rotate animation */
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
+        .divline {
+          flex: 1; height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+        }
+        .link { color: #FF7A00; cursor: pointer; transition: color .2s; }
+        .link:hover { color: #FFC300; }
