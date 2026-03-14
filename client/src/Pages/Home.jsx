@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import Works from './Works'
 
 export default function Home() {
   const canvasRef = useRef(null)
@@ -81,9 +82,6 @@ export default function Home() {
       position: 'relative', overflow: 'hidden',
       fontFamily: "'Rajdhani', sans-serif",
     }}>
-      <style>{`
-       
-      `}</style>
 
       {/* Background */}
       <div className="hero-bg-grad" />
@@ -177,6 +175,7 @@ export default function Home() {
           </div>
         </div>
       </div>
+      <Works/>
     </div>
   )
 }
