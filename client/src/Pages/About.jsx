@@ -133,7 +133,7 @@ const css = `
   @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
 
   .df-root {
-    background: #000;
+  
 
     padding: 80px 0;
     overflow: hidden;
