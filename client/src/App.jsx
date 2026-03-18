@@ -7,6 +7,7 @@ import Home from './Pages/Home'
 import Works from './Pages/Works'
 import Signup1 from './Pages/Signup1'
 import About from './Pages/About'
+import Signup2 from './Pages/Signup2';
 function App() {
 
   return (
@@ -19,6 +20,7 @@ function App() {
   <Route path='/Works' element={<Works />} />
   <Route path='/signup' element={<Signup1 />} /> 
    <Route path='/About' element={<About />} /> 
+   <Route path='/Signup2' element={<Signup2 />} /> 
 </Routes>
     
     </BrowserRouter>
