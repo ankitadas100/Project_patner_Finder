@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { handleError } from "../Components/ErrorMessage";
 import { Eye, EyeOff } from 'lucide-react';
+import { useEmail } from "../context/UserEmailContext";
+import { useNavigate } from "react-router";
 const globalStyles = `
   
 `;
@@ -143,20 +145,20 @@ export default function Signup2() {
     linkedin: "", portfolio: "", college: "",
     about: "", skills: [],
   });
+  const {email}=useEmail()
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
   const [showRepass, setShowRepass] = useState(false);
+  const naviget=useNavigate()
   const set = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
   const validate = () => {
     const e = {};
     if (!form.fullName.trim()) e.fullName = "Full name is required";
-    if (!form.email.trim()) e.email = "Email is required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
-      e.email = "Enter a valid email";
+    if (!email) e.email = "Email is required";
     if (form.github && !/^https?:\/\/(www\.)?github\.com\/.+/.test(form.github))
       e.github = "Enter a valid GitHub URL";
     if (form.linkedin && !/^https?:\/\/(www\.)?linkedin\.com\/.+/.test(form.linkedin))
@@ -194,17 +196,19 @@ export default function Signup2() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ fullname: form.fullName,password:form.password, email: form.email, collagename: form.college, bio: form.about, skill: form.skills, githublink: form.github, linkedinlink: form.linkedin, protfolio: form.portfolio })
+        body: JSON.stringify({ fullname: form.fullName,password:form.password, email: email, collagename: form.college, bio: form.about, skill: form.skills, githublink: form.github, linkedinlink: form.linkedin, protfolio: form.portfolio })
       });
       const data = await responce.json()
-      console.log(data)
+       setLoading(false); 
+       setSubmitted(true); 
+       setTimeout(()=>{return naviget("/")},1000) 
     } catch (error) {
       console.error(error)
       setLoading(false)
       return handleError("Internal Server Error!")
 
     }
-    setTimeout(() => { setLoading(false); setSubmitted(true); }, 1200);
+
   };
 
   return (
@@ -246,8 +250,7 @@ export default function Signup2() {
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </div>
-                <p className="s-title">Profile Submitted!</p>
-                <p className="s-sub">We'll review and get back to you soon</p>
+                <p className="s-title">Profile created ✅!</p>
               </div>
             )}
 
@@ -263,7 +266,7 @@ export default function Signup2() {
                 <div className="fl">
                   <label className="form-label">Email Address</label>
                   <input className="form-input" type="email" placeholder="you@example.com"
-                    value={form.email} onChange={set("email")} />
+                    value={email}  readOnly/>
                   {errors.email && <span className="err">⚠ {errors.email}</span>}
                 </div>
               </div>

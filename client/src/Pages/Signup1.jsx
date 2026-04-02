@@ -2,10 +2,12 @@ import React, { useState, useEffect, useRef } from 'react'
 import { handleError, handleSuccess } from '../Components/ErrorMessage'
 import { useNavigate } from 'react-router'
 import { useAuth } from "../context/AuthContext";
+import { useEmail } from '../context/UserEmailContext';
 import { auth } from "../lib/firebase";
 import { GithubAuthProvider } from 'firebase/auth';
 export default function Signup1() {
   const { user, googleSignIn, githubSignIn } = useAuth();
+  const {setemail}=useEmail()
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -133,8 +135,8 @@ export default function Signup1() {
       }
       setloder(false)
       handleSuccess("OTP verifyed.")
-      setfinalemail(email)
-      return naviget("/");
+      setemail(email)
+      return naviget("/signup2");
 
 
     } catch (error) {
@@ -165,8 +167,9 @@ export default function Signup1() {
         setloder1(false)
         return handleError("You already have an account.")
       }
-      handleSuccess("Signup successful")
+      setemail(data.user.email)
       setloder1(false)
+      return naviget("/signup2")
     } catch (error) {
       console.log(error)
       handleError("Someing wrong. Try Again !")
@@ -204,8 +207,10 @@ const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/frisruserornot`
         setloder2(false)
         return handleError("You already have an account.")
       }
-      handleSuccess("Signup successful")
-      return setloder2(false)
+     setemail(email[0].email)
+
+     setloder2(false)
+     return naviget("/signup2") 
     } catch (error) {
       console.log(error)
       handleError("Someing wrong. Try Again !")
@@ -226,12 +231,6 @@ const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/frisruserornot`
       `}</style>
       <div className="hero-bg-grad" />
       <canvas ref={canvasRef} className="hero-canvas" />
-      {/* Floating Orbs */}
-      {/* <div className="orb1" style={{ position: 'absolute', width: 350, height: 350, left: '-10%', top: '-12%', background: 'radial-gradient(circle,rgba(255,122,0,.2) 0%,transparent 70%)', filter: 'blur(90px)', borderRadius: '50%', pointerEvents: 'none' }} />
-      <div className="orb2" style={{ position: 'absolute', width: 240, height: 240, left: '70%', top: '62%', background: 'radial-gradient(circle,rgba(255,195,0,.15) 0%,transparent 70%)', filter: 'blur(70px)', borderRadius: '50%', pointerEvents: 'none' }} />
-      <div className="orb3" style={{ position: 'absolute', width: 200, height: 200, left: '12%', top: '68%', background: 'radial-gradient(circle,rgba(255,122,0,.12) 0%,transparent 70%)', filter: 'blur(80px)', borderRadius: '50%', pointerEvents: 'none' }} />
-      <div className="orb4" style={{ position: 'absolute', width: 280, height: 280, left: '62%', top: '-18%', background: 'radial-gradient(circle,rgba(255,195,0,.12) 0%,transparent 70%)', filter: 'blur(100px)', borderRadius: '50%', pointerEvents: 'none' }} />
-      <div className="orb5" style={{ position: 'absolute', width: 160, height: 160, left: '83%', top: '78%', background: 'radial-gradient(circle,rgba(255,122,0,.16) 0%,transparent 70%)', filter: 'blur(60px)', borderRadius: '50%', pointerEvents: 'none' }} /> */}
 
       {/* Grid overlay */}
       <div style={{

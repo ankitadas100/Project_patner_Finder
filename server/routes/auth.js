@@ -105,4 +105,20 @@ authRouter.post("/login", async (req, res) => {
     }
 
 })
+authRouter.post("/login-email", async (req, res) => {
+    try {
+
+        const { email } = req.body;
+        const finduser = await User.findOne({ email })
+        if (!finduser) {
+            return res.status(404).json({"status": false, "message": "Invalid credential" })
+        }
+        return res.status(200).json({"message":"Login done", status:true})
+
+    } catch (error) {
+        console.log(error)
+        return res.status(505).json({ "error": "Internal server error" })
+    }
+
+})
 export default authRouter;

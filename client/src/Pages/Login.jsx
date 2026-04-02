@@ -21,67 +21,67 @@ export default function Login() {
     setTimeout(() => setMounted(true), 80)
   }, [])
   useEffect(() => {
-      const canvas = canvasRef.current
-      if (!canvas) return
-      const ctx = canvas.getContext('2d')
-      let animId
-      let particles = []
-  
-      const resize = () => {
-        canvas.width = canvas.offsetWidth
-        canvas.height = canvas.offsetHeight
-      }
-      resize()
-      window.addEventListener('resize', resize)
-  
-      for (let i = 0; i < 60; i++) {
-        particles.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          r: Math.random() * 1.5 + 0.3,
-          dx: (Math.random() - 0.5) * 0.4,
-          dy: (Math.random() - 0.5) * 0.4,
-          o: Math.random() * 0.5 + 0.1,
-        })
-      }
-  
-      const draw = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-        particles.forEach((p) => {
-          ctx.beginPath()
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
-          ctx.fillStyle = `rgba(255,195,0,${p.o})`
-          ctx.fill()
-          p.x += p.dx
-          p.y += p.dy
-          if (p.x < 0 || p.x > canvas.width) p.dx *= -1
-          if (p.y < 0 || p.y > canvas.height) p.dy *= -1
-        })
-        // Draw connecting lines
-        for (let i = 0; i < particles.length; i++) {
-          for (let j = i + 1; j < particles.length; j++) {
-            const dx = particles[i].x - particles[j].x
-            const dy = particles[i].y - particles[j].y
-            const dist = Math.sqrt(dx * dx + dy * dy)
-            if (dist < 100) {
-              ctx.beginPath()
-              ctx.moveTo(particles[i].x, particles[i].y)
-              ctx.lineTo(particles[j].x, particles[j].y)
-              ctx.strokeStyle = `rgba(255,195,0,${0.08 * (1 - dist / 100)})`
-              ctx.lineWidth = 0.5
-              ctx.stroke()
-            }
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    let animId
+    let particles = []
+
+    const resize = () => {
+      canvas.width = canvas.offsetWidth
+      canvas.height = canvas.offsetHeight
+    }
+    resize()
+    window.addEventListener('resize', resize)
+
+    for (let i = 0; i < 60; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.5 + 0.3,
+        dx: (Math.random() - 0.5) * 0.4,
+        dy: (Math.random() - 0.5) * 0.4,
+        o: Math.random() * 0.5 + 0.1,
+      })
+    }
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      particles.forEach((p) => {
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(255,195,0,${p.o})`
+        ctx.fill()
+        p.x += p.dx
+        p.y += p.dy
+        if (p.x < 0 || p.x > canvas.width) p.dx *= -1
+        if (p.y < 0 || p.y > canvas.height) p.dy *= -1
+      })
+      // Draw connecting lines
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x
+          const dy = particles[i].y - particles[j].y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+          if (dist < 100) {
+            ctx.beginPath()
+            ctx.moveTo(particles[i].x, particles[i].y)
+            ctx.lineTo(particles[j].x, particles[j].y)
+            ctx.strokeStyle = `rgba(255,195,0,${0.08 * (1 - dist / 100)})`
+            ctx.lineWidth = 0.5
+            ctx.stroke()
           }
         }
-        animId = requestAnimationFrame(draw)
       }
-      draw()
-      return () => {
-        cancelAnimationFrame(animId)
-        window.removeEventListener('resize', resize)
-      }
-    }, [])
-  
+      animId = requestAnimationFrame(draw)
+    }
+    draw()
+    return () => {
+      cancelAnimationFrame(animId)
+      window.removeEventListener('resize', resize)
+    }
+  }, [])
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -89,70 +89,56 @@ export default function Login() {
       if (!email) return
 
       setloder(true)
-      const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/sendemail`
+      const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/login`
       const responce = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ email: email })
+        body: JSON.stringify({ email: email, password: pass })
       });
       const data = await responce.json()
-      if (data.status) {
-        setloder(false)
-        handleSuccess("OTP Send successfully.")
-        return setSubmitted(true)
-      }
-    } catch (error) {
-      setloder(false)
-      handleError("Internal Server Error !, Try Again")
-      return console.error(error);
-    }
 
-  }
-
-  const handleotpsubmit = async (e) => {
-    e.preventDefault();
-    setloder(true)
-    try {
-      const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/otpverify`
-      const responce = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ fotp: otp })
-      });
-      const data = await responce.json()
       if (!data.status) {
-        setloder(false);
-        return handleError("OTP not match , Try again!")
+        setloder(false)
+        return handleError("Invalid credential")
+
       }
-      setloder(false)
-      handleSuccess("OTP verifyed.")
-      setfinalemail(email)
-      return naviget("/");
-
-
+      localStorage.setItem('auth-token', data.token);
+      handleSuccess("Login Successful")
+      return naviget("/")
     } catch (error) {
       setloder(false)
       handleError("Internal Server Error !, Try Again")
       return console.error(error);
-
     }
 
   }
+
 
   const handlegoogleauth = async () => {
     setloder1(true)
     try {
-
-
       const data = await googleSignIn();
       console.log(data.user.email)
+      const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/login-email`
+      const responce = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email: data.user.email })
+      });
+      const data2 = await responce.json()
+      console.log(data2)
+      if (!data2.status) {
+        setloder1(false)
+        return handleError("You don't have any account! Sigup frist.")
+      }
       setfinalemail(data.user.email)
-      handleSuccess("Signup successful")
+      handleSuccess("Login successful")
       setloder1(false)
+      return naviget("/")
     } catch (error) {
       console.log(error)
       handleError("Someing wrong. Try Again !")
@@ -176,9 +162,24 @@ export default function Login() {
       });
       const email = await res.json();
       // console.log(email[0]);
-      setfinalemail(email[0].email);
-      handleSuccess("Signup successful")
-      return setloder2(false)
+      const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/login-email`
+      const responce = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email: email[0].email })
+      });
+      const data2 = await responce.json()
+      console.log(data2)
+      if (!data2.status) {
+        setloder2(false)
+        return handleError("You don't have any account! Sigup frist.")
+      }
+
+      handleSuccess("Login successful")
+      setloder2(false)
+      return naviget("/")
     } catch (error) {
       console.log(error)
       handleError("Someing wrong. Try Again !")
@@ -188,7 +189,7 @@ export default function Login() {
 
   return (
     <div style={{
-      minHeight: '100vh', width: '100%',background:"#000",
+      minHeight: '100vh', width: '100%', background: "#000",
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       position: 'relative', overflow: 'hidden',
       fontFamily: "'Rajdhani', sans-serif", position: 'relative',
@@ -214,10 +215,8 @@ export default function Login() {
       <div className="glass-card">
 
         {/* Logo */}
-
-        {!submitted ? (
           <>
-            <h1 style={{ color: '#fff', fontSize: '2rem', fontWeight: 700, margin: '0 0 6px', letterSpacing: '.06em', lineHeight: 1.15, textTransform: 'uppercase', textAlign:"center" }}>
+            <h1 style={{ color: '#fff', fontSize: '2rem', fontWeight: 700, margin: '0 0 6px', letterSpacing: '.06em', lineHeight: 1.15, textTransform: 'uppercase', textAlign: "center" }}>
               Login
             </h1>
             <form >
@@ -242,7 +241,7 @@ export default function Login() {
               />
 
               <button type='submit' disabled={loder ? true : false} className="verify-btn" style={{ marginTop: 22 }} onClick={handleSubmit}>
-                {loder ? <span class="loader"></span> : "Verify Your Email →"}
+                {loder ? <span class="loader"></span> : "Login"}
               </button>
             </form>
 
@@ -277,36 +276,6 @@ export default function Login() {
               <span style={{ fontSize: '.76rem' }}>By continuing, you agree to our <span className="link">Terms</span> &amp; <span className="link">Privacy Policy</span>.</span>
             </p>
           </>
-        ) : (
-          /* Success State */
-          <div style={{ textAlign: 'center', padding: '16px 0' }}>
-            <div style={{ width: 68, height: 68, borderRadius: '50%', background: '#FF7A00', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 26px', boxShadow: '0 6px 36px rgba(255,122,0,.5)' }}>
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-                <path d="M20 6L9 17l-5-5" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-            <h2 style={{ color: '#fff', fontWeight: 700, fontSize: '1.7rem', margin: '0 0 8px', letterSpacing: '.08em', textTransform: 'uppercase' }}>
-              Check Your Inbox!
-            </h2>
-            <p style={{ color: 'rgba(255,255,255,.45)', fontSize: '.95rem', lineHeight: 1.6, margin: '0 0 26px', fontFamily: 'sans-serif' }}>
-              We've sent a verification link to<br />
-              <span style={{ color: '#FF7A00', fontWeight: 600, fontSize: '1.05rem', letterSpacing: '.04em' }}>{email}</span>
-            </p>
-            <label style={{ display: 'block', color: 'rgba(255,255,255,.55)', fontSize: '.9rem', fontWeight: 600, marginBottom: 9, letterSpacing: '.1em', textTransform: 'uppercase' }}>
-              Enter your OTP
-            </label>
-            <input
-              className="email-input"
-              type="text"
-              name="otp"
-              placeholder="1234"
-              value={otp}
-              onChange={e => setotp(e.target.value)}
-              required
-            />
-            <button className="verify-btn" onClick={handleotpsubmit}>{loder ? <span class="loader"></span> : 'Verify OTP'}</button>
-          </div>
-        )}
       </div>
     </div>
 
