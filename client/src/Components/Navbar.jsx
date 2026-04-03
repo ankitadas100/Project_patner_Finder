@@ -4,6 +4,7 @@ import logo from "../assets/logo.png";
 import { useAuth } from "../context/AuthContext";
 import { Settings, Globe, Sparkles, LogOut } from "lucide-react";
 import { useUserData } from "../context/UserdataContext";
+import secureLocalStorage from "react-secure-storage";
 const NAV_ITEMS = ["Home", "Services", "Projects", "About", "Contact"];
 
 
@@ -11,7 +12,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeItem, setActiveItem] = useState("Home");
-  const { user,logout } = useAuth();
+  const {logout } = useAuth();
   const {useralldata}=useUserData()
   
   // Added Authentication States
@@ -39,6 +40,7 @@ export default function Navbar() {
   const naviget=useNavigate()
 const handlelogout=async()=>{
  await logout();
+ secureLocalStorage.removeItem('auth-token');
   naviget("/")
   window.location.reload();
 }

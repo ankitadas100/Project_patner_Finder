@@ -14,38 +14,46 @@ import { useAuth } from './context/AuthContext';
 import { useUserData } from './context/UserdataContext';
 import LoadingScreen from './Components/LodingScreen';
 import secureLocalStorage from 'react-secure-storage';
+import { GithubAuthProvider } from 'firebase/auth';
 function App() {
   const { user } = useAuth()
   const { setUseralldata } = useUserData();
   const [Isloginuser, setIsIsloginuser] = useState(false)
   useEffect(() => {
     const CheckUserLogin = async () => {
-      const token = await user?.getIdToken();
-      const localtoken = secureLocalStorage.getItem('auth-token');
-      console.log(token)
-      console.log(localtoken)
-      if (localtoken) {
-        const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/getuser`;
-        const response = await fetch(url, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "auth-token": token
-          },
-        });
-        const data = await response.json();
+      try {
+
+        const token = await user?.getIdToken();
+        const localtoken = secureLocalStorage.getItem('auth-token');
+        if (localtoken) {
+          const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/getuser`;
+          const response = await fetch(url, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "auth-token": localtoken
+            },
+          });
+          const data = await response.json();
+          setUseralldata(data.userdata)
+        }
+        if (token) {
+          const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/getuser`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          const data = await res.json();
+          setUseralldata(data.userdata)
+
+        }
+      } catch (error) {
+        console.log(error)
       }
-      if (token) {
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/getuser`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        const data = await res.json();
-        console.log(data.userdata)
-        setUseralldata(data.userdata)
+      finally {
+
+        setIsIsloginuser(true)
       }
-      setIsIsloginuser(true)
 
     }
     CheckUserLogin();

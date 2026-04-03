@@ -27,15 +27,17 @@ const fetchuer=async(req,res,next)=>{
             const decoded = await admin.auth().verifyIdToken(token);
             req.email=decoded.email;
             console.log(decoded);
+
             next();
         } 
         if(token2){
-            const data= jwt.verify(token2,process.env.JWT_SERECT)
-            console.log(data);
+            const decoded= jwt.verify(token2,process.env.JWT_SERECT)
+            console.log(decoded);
+            req.email=decoded.email;
             next();
         }
 
-        if(!token && !token2 ) return res.status(401).send("No token");
+        if(!token && !token2) return res.status(401).send("No token");
 
     } catch (error) {
         console.log(error)
