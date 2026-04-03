@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { handleError } from "../Components/ErrorMessage";
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Camera } from 'lucide-react'; // Added Camera icon
 import { useEmail } from "../context/UserEmailContext";
 import { useNavigate } from "react-router";
+import axios from "axios"
 const globalStyles = `
   
 `;
@@ -138,25 +139,42 @@ function SkillsInput({ value, onChange }) {
   );
 }
 
-// ── Main Component ────────────────────────────────────────────────────────────
 export default function Signup2() {
   const [form, setForm] = useState({
+    profilePic: "", // Added to state for the upload preview
     fullName: "", email: "", password: "", repass: "", github: "",
     linkedin: "", portfolio: "", college: "",
     about: "", skills: [],
   });
-  const {email}=useEmail()
+
+  const { email } = useEmail();
   const [errors, setErrors] = useState({});
+  const [Image,setImage]=useState(null)
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [showRepass, setShowRepass] = useState(false);
-  const naviget=useNavigate()
+  const naviget = useNavigate();
+
   const set = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
+  // Handle Image Upload Preview
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    setImage(e.target.files[0])
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setForm((prev) => ({ ...prev, profilePic: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const validate = () => {
     const e = {};
+    if (!form.profilePic) e.profilePic = "Upload profile pic"
     if (!form.fullName.trim()) e.fullName = "Full name is required";
     if (!email) e.email = "Email is required";
     if (form.github && !/^https?:\/\/(www\.)?github\.com\/.+/.test(form.github))
@@ -185,30 +203,52 @@ export default function Signup2() {
     const errs = validate();
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
-    console.log(form)
+    console.log(form);
     setLoading(true);
     try {
-
-
-      const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/register`
-      const responce = await fetch(url, {
-        method: "POST",
+      const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/register`;
+      const formdata = new FormData();
+      if (form.profilePic) {
+        formdata.append("profilepic", Image);
+      }
+      const useralldata = ({
+        fullname: form.fullName,
+        password: form.password,
+        email: email,
+        collagename: form.college,
+        bio: form.about,
+        skill: form.skills,
+        githublink: form.github,
+        linkedinlink: form.linkedin,
+        protfolio: form.portfolio
+      })
+      formdata.append("userinfo", JSON.stringify(useralldata))
+      const res = await axios.post(url, formdata, {
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "multipart/form-data",
         },
-        body: JSON.stringify({ fullname: form.fullName,password:form.password, email: email, collagename: form.college, bio: form.about, skill: form.skills, githublink: form.github, linkedinlink: form.linkedin, protfolio: form.portfolio })
       });
-      const data = await responce.json()
-       setLoading(false); 
-       setSubmitted(true); 
-       setTimeout(()=>{return naviget("/")},1000) 
+
+      // const responce = await fetch(url, {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json"
+      //   },
+      //   body: JSON.stringify({
+
+      //     // Note: form.profilePic is available here if your backend needs it!
+      //   })
+      // });
+  
+      console.log(res.data)
+      setLoading(false);
+      setSubmitted(true);
+      setTimeout(() => { return naviget("/login"); }, 1000);
     } catch (error) {
-      console.error(error)
-      setLoading(false)
-      return handleError("Internal Server Error!")
-
+      console.error(error);
+      setLoading(false);
+      return handleError("Internal Server Error!");
     }
-
   };
 
   return (
@@ -255,6 +295,71 @@ export default function Signup2() {
             )}
 
             <form className="fg" onSubmit={handleSubmit} noValidate>
+
+              {/* Profile Image Upload Section */}
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: "2rem" }}>
+                <div style={{ position: "relative", width: "100px", height: "100px" }}>
+                  <label
+                    htmlFor="profile-upload"
+                    style={{
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      border: "2px dashed #FFC300",
+                      backgroundColor: "rgba(255,195,0,0.05)",
+                      overflow: "hidden",
+                      transition: "all 0.2s ease-in-out"
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,195,0,0.15)"}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255,195,0,0.05)"}
+                  >
+                    {form.profilePic ? (
+                      <img
+                        src={form.profilePic}
+                        alt="Profile Preview"
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    ) : (
+                      <Camera color="#FFC300" size={32} style={{ opacity: 0.8 }} />
+                    )}
+                  </label>
+                  <input
+                    id="profile-upload"
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    onChange={handleImageUpload}
+                  />
+                  {/* Small plus icon badge */}
+                  {!form.profilePic && (
+                    <div style={{
+                      position: "absolute",
+                      bottom: 0,
+                      right: 0,
+                      background: "#FFC300",
+                      color: "#000",
+                      borderRadius: "50%",
+                      width: "24px",
+                      height: "24px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: "bold",
+                      fontSize: "16px",
+                      boxShadow: "0 0 10px rgba(255,195,0,.6)",
+                      pointerEvents: "none"
+                    }}>
+                      +
+                    </div>
+                  )}
+                  {errors.profilePic && <span className="err">⚠ {errors.profilePic}</span>}
+                </div>
+              </div>
+
               {/* Row 1 */}
               <div className="form-row">
                 <div className="fl">
@@ -266,7 +371,7 @@ export default function Signup2() {
                 <div className="fl">
                   <label className="form-label">Email Address</label>
                   <input className="form-input" type="email" placeholder="you@example.com"
-                    value={email}  readOnly/>
+                    value={email} readOnly />
                   {errors.email && <span className="err">⚠ {errors.email}</span>}
                 </div>
               </div>
@@ -275,25 +380,25 @@ export default function Signup2() {
               <div className="form-row">
                 <div className="fl">
                   <label className="form-label">Password</label>
-                <div style={{ position: "relative", display: "flex" }}>
-                  <input className="form-input" type={showPassword ? "text" : "password"} placeholder="••••••••"
+                  <div style={{ position: "relative", display: "flex" }}>
+                    <input className="form-input" type={showPassword ? "text" : "password"} placeholder="••••••••"
                       value={form.password} onChange={set("password")} />
-                  <button type="button" className="password-toggle-btn" onClick={() => setShowPassword(!showPassword)}>
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
+                    <button type="button" className="password-toggle-btn" onClick={() => setShowPassword(!showPassword)}>
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
                   </div>
                   {errors.password && <span className="err">⚠ {errors.password}</span>}
                 </div>
                 <div className="fl">
                   <label className="form-label">Renter Password</label>
                   <div style={{ position: "relative", display: "flex" }}>
-                 <input className="form-input" type={showRepass ? "text" : "password"} placeholder="••••••••"
+                    <input className="form-input" type={showRepass ? "text" : "password"} placeholder="••••••••"
                       value={form.repass} onChange={set("repass")} />
-                  <button type="button" className="password-toggle-btn" onClick={() => setShowRepass(!showRepass)}>
+                    <button type="button" className="password-toggle-btn" onClick={() => setShowRepass(!showRepass)}>
                       {showRepass ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
-                    </div>
-                   {errors.repass && <span className="err">⚠ {errors.repass}</span>}
+                  </div>
+                  {errors.repass && <span className="err">⚠ {errors.repass}</span>}
                 </div>
               </div>
 

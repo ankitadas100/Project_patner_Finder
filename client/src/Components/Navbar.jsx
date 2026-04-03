@@ -1,23 +1,50 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router";
+import { useState, useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router";
 import logo from "../assets/logo.png";
+import { useAuth } from "../context/AuthContext";
+import { Settings, Globe, Sparkles, LogOut } from "lucide-react";
+import { useUserData } from "../context/UserdataContext";
 const NAV_ITEMS = ["Home", "Services", "Projects", "About", "Contact"];
+
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeItem, setActiveItem] = useState("Home");
+  const { user,logout } = useAuth();
+  const {useralldata}=useUserData()
   
+  // Added Authentication States
+  const [isLogin, setIsLogin] = useState(true);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    console.log(useralldata)
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setProfileMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+  const naviget=useNavigate()
+const handlelogout=async()=>{
+ await logout();
+  naviget("/")
+  window.location.reload();
+}
   return (
     <div style={{ fontFamily: "'Rajdhani', sans-serif" }}>
       <style>{`
-      
         @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
 
         .nb-root {
@@ -57,24 +84,6 @@ export default function Navbar() {
           align-items: center;
           gap: 10px;
           text-decoration: none;
-        }
-
-        .nb-logo-mark {
-          width: 36px;
-          height: 36px;
-          background: linear-gradient(135deg, #FFCC00, #FF8C00);
-          border-radius: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 17px;
-          box-shadow: 0 0 14px rgba(255,204,0,0.45);
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .nb-logo:hover .nb-logo-mark {
-          transform: rotate(15deg) scale(1.12);
-          box-shadow: 0 0 26px rgba(255,204,0,0.75);
         }
 
         .nb-logo-text {
@@ -138,24 +147,15 @@ export default function Navbar() {
           box-shadow: 0 0 8px rgba(255,204,0,0.6);
         }
 
-        .nb-link:hover {
+        .nb-link:hover, .nb-link.nb-active {
           color: #FFCC00;
         }
 
-        .nb-link:hover::before {
+        .nb-link:hover::before, .nb-link.nb-active::before {
           transform: scaleX(1);
         }
 
-        .nb-link:hover::after {
-          transform: scaleX(1);
-        }
-
-        .nb-link.nb-active {
-          color: #FFCC00;
-          background: rgba(255,204,0,0.10);
-        }
-
-        .nb-link.nb-active::after {
+        .nb-link:hover::after, .nb-link.nb-active::after {
           transform: scaleX(1);
         }
 
@@ -178,32 +178,13 @@ export default function Navbar() {
           letter-spacing: 0.08em;
           text-transform: uppercase;
           cursor: pointer;
-          overflow: hidden;
           transition: color 0.3s, border-color 0.3s, box-shadow 0.3s;
-        }
-
-        .nb-btn-login::before {
-          content: '';
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          width: 0;
-          height: 0;
-          background: rgba(255,204,0,0.12);
-          border-radius: 50%;
-          transform: translate(-50%, -50%);
-          transition: width 0.4s ease, height 0.4s ease;
         }
 
         .nb-btn-login:hover {
           border-color: #FFCC00;
           color: #fff;
           box-shadow: 0 0 16px rgba(255,204,0,0.25);
-        }
-
-        .nb-btn-login:hover::before {
-          width: 220px;
-          height: 220px;
         }
 
         .nb-btn-signup {
@@ -219,36 +200,124 @@ export default function Navbar() {
           letter-spacing: 0.08em;
           text-transform: uppercase;
           cursor: pointer;
-          overflow: hidden;
-          transition: transform 0.2s, box-shadow 0.3s, background 0.3s;
           box-shadow: 0 0 14px rgba(255,204,0,0.35);
-        }
-
-        .nb-btn-signup::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent);
-          transition: left 0.45s ease;
+          transition: transform 0.2s, box-shadow 0.3s, background 0.3s;
         }
 
         .nb-btn-signup:hover {
-          transform: translateY(-2px) scale(1.03);
+          transform: translateY(-2px);
           box-shadow: 0 6px 24px rgba(255,204,0,0.55);
           background: #ffe033;
         }
 
-        .nb-btn-signup:hover::before {
-          left: 100%;
+        /* --- Profile Dropdown Styles --- */
+        .nb-profile-wrapper {
+          position: relative;
         }
 
-        .nb-btn-signup:active {
-          transform: scale(0.97);
+        .nb-profile-avatar {
+          width: 42px;
+          height: 42px;
+          border-radius: 50%;
+          border: 2px solid rgba(255, 204, 0, 0.6);
+          cursor: pointer;
+          object-fit: cover;
+          transition: border-color 0.3s, box-shadow 0.3s;
         }
 
+        .nb-profile-avatar:hover {
+          border-color: #FFCC00;
+          box-shadow: 0 0 12px rgba(255, 204, 0, 0.4);
+        }
+
+        .nb-profile-dropdown {
+          position: absolute;
+          top: 60px;
+          right: 0;
+          width: 260px;
+          background: rgba(15, 15, 15, 0.95);
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
+          border: 1px solid #FFCC00; /* Matched your gold color instead of green */
+          border-radius: 12px;
+          padding: 16px;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(-10px);
+          transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .nb-profile-dropdown.open {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0);
+        }
+
+        .nb-profile-header {
+          margin-bottom: 12px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nb-profile-name {
+          color: #fff;
+          font-size: 18px;
+          font-weight: 700;
+          letter-spacing: 0.05em;
+          margin: 0 0 4px 0;
+        }
+
+        .nb-profile-email {
+          color: rgba(255, 255, 255, 0.5);
+          font-size: 14px;
+          font-weight: 500;
+          margin: 0;
+        }
+
+        .nb-profile-menu {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .nb-profile-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 10px 12px;
+          color: rgba(255, 255, 255, 0.8);
+          text-decoration: none;
+          font-size: 15px;
+          font-weight: 600;
+          border-radius: 8px;
+          transition: background 0.2s, color 0.2s;
+          cursor: pointer;
+          background: transparent;
+          border: none;
+          width: 100%;
+          text-align: left;
+          font-family: 'Rajdhani', sans-serif;
+        }
+
+        .nb-profile-item:hover {
+          background: rgba(255, 204, 0, 0.1);
+          color: #FFCC00;
+        }
+
+        .nb-profile-item.logout {
+          color: #ff4d4d;
+          margin-top: 8px;
+        }
+
+        .nb-profile-item.logout:hover {
+          background: rgba(255, 77, 77, 0.1);
+        }
+
+        /* --- Mobile Styles --- */
         .nb-hamburger {
           display: none;
           flex-direction: column;
@@ -257,34 +326,14 @@ export default function Navbar() {
           border: none;
           cursor: pointer;
           padding: 6px;
-          border-radius: 8px;
-          transition: background 0.2s;
-        }
-
-        .nb-hamburger:hover {
-          background: rgba(255,204,0,0.1);
         }
 
         .nb-bar {
           width: 22px;
           height: 2px;
           background: #FFCC00;
-          border-radius: 2px;
-          transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+          transition: all 0.3s;
           display: block;
-        }
-
-        .nb-hamburger.nb-open .nb-bar:nth-child(1) {
-          transform: translateY(7px) rotate(45deg);
-        }
-
-        .nb-hamburger.nb-open .nb-bar:nth-child(2) {
-          opacity: 0;
-          transform: scaleX(0);
-        }
-
-        .nb-hamburger.nb-open .nb-bar:nth-child(3) {
-          transform: translateY(-7px) rotate(-45deg);
         }
 
         .nb-mobile {
@@ -292,54 +341,19 @@ export default function Navbar() {
           border-radius: 18px;
           background: rgba(15, 15, 15, 0.92);
           backdrop-filter: blur(24px);
-          -webkit-backdrop-filter: blur(24px);
           border: 1px solid rgba(255,204,0,0.18);
           padding: 16px 24px 20px;
-          box-shadow: 0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,204,0,0.07);
-          animation: nbSlide 0.25s ease;
-        }
-
-        @keyframes nbSlide {
-          from { opacity: 0; transform: translateY(-10px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-
-        .nb-mobile ul {
-          list-style: none;
-          margin: 0 0 16px 0;
-          padding: 0;
         }
 
         .nb-mobile-link {
           display: flex;
-          align-items: center;
           justify-content: space-between;
           padding: 12px 6px;
           color: rgba(255,255,255,0.55);
           text-decoration: none;
           font-size: 16px;
           font-weight: 600;
-          letter-spacing: 0.07em;
-          text-transform: uppercase;
           border-bottom: 1px solid rgba(255,255,255,0.05);
-          transition: color 0.2s, padding-left 0.25s, border-color 0.2s;
-        }
-
-        .nb-mobile-link:hover {
-          color: #FFCC00;
-          padding-left: 12px;
-          border-bottom-color: rgba(255,204,0,0.2);
-        }
-
-        .nb-mobile-arrow {
-          opacity: 0;
-          transition: opacity 0.2s;
-          font-size: 13px;
-          color: #FFCC00;
-        }
-
-        .nb-mobile-link:hover .nb-mobile-arrow {
-          opacity: 1;
         }
 
         .nb-mobile-btns {
@@ -348,37 +362,32 @@ export default function Navbar() {
           margin-top: 16px;
         }
 
-        .nb-mobile-btns .nb-btn-login,
-        .nb-mobile-btns .nb-btn-signup {
-          flex: 1;
-          padding: 12px;
-          text-align: center;
-        }
-
         @media (max-width: 640px) {
-          .nb-links { display: none; }
-          .nb-btns  { display: none; }
+          .nb-links, .nb-btns { display: none; }
           .nb-hamburger { display: flex; }
         }
       `}</style>
 
       <nav className="nb-root">
         <div className={`nb-inner${scrolled ? " nb-scrolled" : ""}`}>
-
+          
           {/* Logo */}
           <Link to="/" className="nb-logo">
-            <img className="logo-style" style={{height:"78px", width:"78px"}} src={logo} alt="" />
-            <div className="nb-logo-text"> <span>Dev</span><span style={{color:"#e1a203"}}>forge</span></div>
+            <img className="logo-style" style={{ height: "78px", width: "78px" }} src={logo} alt="" />
+            <div className="nb-logo-text"> <span>Dev</span><span style={{ color: "#e1a203" }}>forge</span></div>
           </Link>
 
           {/* Desktop Links */}
           <ul className="nb-links">
             {NAV_ITEMS.map((item) => (
               <li key={item}>
-                
-                 <Link to="/"
+                <Link
+                  to="/"
                   className={`nb-link${activeItem === item ? " nb-active" : ""}`}
-                  // onClick={(e) => { e.preventDefault(); setActiveItem(item); }}
+                  onClick={(e) => {
+                     // e.preventDefault(); 
+                     // setActiveItem(item); 
+                  }}
                 >
                   {item}
                 </Link>
@@ -386,10 +395,57 @@ export default function Navbar() {
             ))}
           </ul>
 
-          {/* Desktop Buttons */}
+          {/* Actions (Login/Signup OR Profile) */}
           <div className="nb-btns">
-            <Link to="/login"><button className="nb-btn-login">Log In</button></Link>
-           <Link to="/signup"> <button className="nb-btn-signup">Sign Up</button></Link>
+            {!useralldata ? (
+              <>
+                <Link to="/login"><button className="nb-btn-login">Log In</button></Link>
+                <Link to="/signup"><button className="nb-btn-signup">Sign Up</button></Link>
+              </>
+            ) : (
+              <div className="nb-profile-wrapper" ref={dropdownRef}>
+                <img
+                  src={useralldata.image_url}
+                  alt="Profile"
+                  className="nb-profile-avatar"
+                  onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                />
+
+                {/* Dropdown Menu */}
+                <div className={`nb-profile-dropdown ${profileMenuOpen ? "open" : ""}`}>
+                  <div className="nb-profile-header">
+                    <p className="nb-profile-name">{useralldata.fullname}</p>
+                    <p className="nb-profile-email">{useralldata.email}</p>
+                  </div>
+                  
+                  <ul className="nb-profile-menu">
+                    <li>
+                      <Link to="/settings" className="nb-profile-item">
+                        <Settings size={18} /> Account settings
+                      </Link>
+                    </li>
+                    <li>
+                      <button className="nb-profile-item">
+                        <Globe size={18} /> English
+                      </button>
+                    </li>
+                    <li>
+                      <Link to="/upgrade" className="nb-profile-item">
+                        <Sparkles size={18} /> Upgrade
+                      </Link>
+                    </li>
+                    <li>
+                      <button 
+                        className="nb-profile-item logout"
+                        onClick={handlelogout} // Dummy logout action
+                      >
+                        <LogOut size={18} /> Sign out
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Hamburger */}
@@ -407,11 +463,11 @@ export default function Navbar() {
         {/* Mobile Menu */}
         {menuOpen && (
           <div className="nb-mobile">
-            <ul>
+            <ul style={{ listStyle: "none", padding: 0, margin: "0 0 16px 0" }}>
               {NAV_ITEMS.map((item) => (
                 <li key={item}>
-                  
-                   <Link to="/"
+                  <Link
+                    to="/"
                     className="nb-mobile-link"
                     onClick={(e) => {
                       e.preventDefault();
@@ -420,15 +476,36 @@ export default function Navbar() {
                     }}
                   >
                     {item}
-                    <span className="nb-mobile-arrow">→</span>
                   </Link>
                 </li>
               ))}
             </ul>
-            <div className="nb-mobile-btns">
-             <Link to="/login"> <button className="nb-btn-login">Log In</button></Link>
-              <Link to="/signup"><button className="nb-btn-signup">Sign Up</button></Link>
-            </div>
+            
+            {/* Mobile Auth/Profile logic */}
+            {!useralldata ? (
+              <div className="nb-mobile-btns">
+                <Link to="/login" style={{ flex: 1 }}><button className="nb-btn-login" style={{ width: "100%" }}>Log In</button></Link>
+                <Link to="/signup" style={{ flex: 1 }}><button className="nb-btn-signup" style={{ width: "100%" }}>Sign Up</button></Link>
+              </div>
+            ) : (
+              <div style={{ marginTop: "16px", borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+                  <img src={useralldata.image_url} alt="Profile" style={{ width: "40px", height: "40px", borderRadius: "50%" }} />
+                  <div>
+                    <p style={{ color: "#fff", margin: 0, fontWeight: "bold" }}>{useralldata.fullname}</p>
+                    <p style={{ color: "rgba(255,255,255,0.5)", margin: 0, fontSize: "12px" }}>{useralldata.email}</p>
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <Link to="/settings" className="nb-profile-item" style={{ padding: "8px 0" }}>
+                    <Settings size={18} /> Account settings
+                  </Link>
+                  <button className="nb-profile-item logout" onClick={() => setIsLogin(false)} style={{ padding: "8px 0" }}>
+                    <LogOut size={18} /> Sign out
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </nav>

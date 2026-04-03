@@ -9,6 +9,10 @@ const userSchema = new mongoose.Schema({
         require: true,
         unique: true
     },
+    image_url:{
+        type: String,
+        require: true,
+    },
     collagename: {
         type: String,
         require: true,

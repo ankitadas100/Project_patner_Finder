@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router'
 import { useAuth } from "../context/AuthContext";
 import { auth } from "../lib/firebase";
 import { GithubAuthProvider } from 'firebase/auth';
+import secureLocalStorage from 'react-secure-storage';
 export default function Login() {
   const { user, googleSignIn, githubSignIn } = useAuth();
   const [email, setEmail] = useState('')
@@ -104,7 +105,7 @@ export default function Login() {
         return handleError("Invalid credential")
 
       }
-      localStorage.setItem('auth-token', data.token);
+      secureLocalStorage.setItem('auth-token', data.token)
       handleSuccess("Login Successful")
       return naviget("/")
     } catch (error) {
