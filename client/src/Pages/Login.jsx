@@ -6,7 +6,7 @@ import { auth } from "../lib/firebase";
 import { GithubAuthProvider } from 'firebase/auth';
 import secureLocalStorage from 'react-secure-storage';
 export default function Login() {
-  const { user, googleSignIn, githubSignIn } = useAuth();
+  const { user, googleSignIn, githubSignIn, setLocaluser } = useAuth();
   const [email, setEmail] = useState('')
   const [pass, setPass] = useState('')
   const [submitted, setSubmitted] = useState(false)
@@ -107,6 +107,7 @@ export default function Login() {
       }
       secureLocalStorage.setItem('auth-token', data.token)
       handleSuccess("Login Successful")
+      setLocaluser(true)
       return naviget("/")
     } catch (error) {
       setloder(false)

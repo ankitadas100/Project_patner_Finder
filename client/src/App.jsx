@@ -15,17 +15,20 @@ import { useUserData } from './context/UserdataContext';
 import LoadingScreen from './Components/LodingScreen';
 import secureLocalStorage from 'react-secure-storage';
 import Requirement from './Pages/PostRequirement';
+import Footer from './Pages/Footer';
+import Requirement2 from './Pages/Requirment';
 
 function App() {
   const { user } = useAuth()
+  const {localuser}=useAuth();
   const { setUseralldata } = useUserData();
-  const [Isloginuser, setIsIsloginuser] = useState()
+  const [Isloginuser, setIsIsloginuser] = useState(false)
   useEffect(() => {
     const CheckUserLogin = async () => {
+      setIsIsloginuser(false)
       try {
-
         const token = await user?.getIdToken();
-        const localtoken = secureLocalStorage.getItem('auth-token');
+        const localtoken = secureLocalStorage.getItem('auth-token');;
         if (localtoken) {
           const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/getuser`;
           const response = await fetch(url, {
@@ -50,13 +53,20 @@ function App() {
           setUseralldata(data.userdata)
           setIsIsloginuser(true)
         }
+        if(!token || !localtoken ){
+        setIsIsloginuser(true)
+        }
+        
       } catch (error) {
         console.log(error)
         setIsIsloginuser(true)
       }
     }
-    CheckUserLogin();
-  }, [user])
+   
+      CheckUserLogin();
+    
+    
+  }, [user,localuser])
   if (!Isloginuser)
     return (
       <LoadingScreen />
@@ -74,9 +84,10 @@ function App() {
           <Route path='/About' element={<About />} />
           <Route path='/Signup2' element={<Signup2 />} />
           <Route path='/login' element={<Login />} />
-          <Route path='/postrequiremen' element={<Requirement />} />
+          <Route path='/postrequiremen' element={<Requirement2 />} />
           
         </Routes>
+        <Footer/>
       </BrowserRouter>
     )
   }

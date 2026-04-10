@@ -2,11 +2,13 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import { auth, Provider, githubProvider } from "../lib/firebase";
+import secureLocalStorage from "react-secure-storage";
 
 const AuthCtx = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [localuser,setLocaluser]= useState(null)
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,7 +36,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthCtx.Provider
-      value={{ user, loading, googleSignIn, githubSignIn, logout }}
+      value={{ user, loading, googleSignIn, githubSignIn, logout ,localuser,setLocaluser }}
     >
       {children}
     </AuthCtx.Provider>
