@@ -28,7 +28,7 @@ function App() {
       setIsIsloginuser(false)
       try {
         const token = await user?.getIdToken();
-        const localtoken = secureLocalStorage.getItem('auth-token');;
+        const localtoken = secureLocalStorage.getItem('auth-token');
         if (localtoken) {
           const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/getuser`;
           const response = await fetch(url, {

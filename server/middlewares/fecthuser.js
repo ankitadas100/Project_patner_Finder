@@ -26,7 +26,7 @@ const fetchuer=async(req,res,next)=>{
         if (token){
             const decoded = await admin.auth().verifyIdToken(token);
             req.email=decoded.email;
-            console.log(decode);
+            console.log(decoded);
 
             next();
         } 
