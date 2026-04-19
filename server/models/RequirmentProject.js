@@ -32,7 +32,7 @@ const RequirmentSchemaofProject = new mongoose.Schema({
     },  
     ProjectRepoLink:{
         type:String,
-    }
+    },
 })          
 const RequirmentProject = mongoose.model("RequirmentProject", RequirmentSchemaofProject);
 export default RequirmentProject;

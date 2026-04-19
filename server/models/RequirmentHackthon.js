@@ -32,7 +32,7 @@ const RequirmentSchemaofHackthon = new mongoose.Schema({
     RequiredSkills:{
         type:Array,
         require:true
-    },  
+    }, 
 })
 const RequirmentHackthon = mongoose.model("RequirmentHackthon", RequirmentSchemaofHackthon);
 export default RequirmentHackthon;
