@@ -3,6 +3,7 @@ import fetchuer from '../middlewares/fecthuser.js';
 import RequirmentHackthon from '../models/RequirmentHackthon.js';
 import User from '../models/User.js';
 import RequirmentProject from '../models/RequirmentProject.js';
+import userApplication from '../models/Application.js';
 
 const requirmentWorkRouter = express.Router();
 
@@ -58,7 +59,7 @@ requirmentWorkRouter.get("/all-hackthon-requirment", async (req, res) => {
     try {
 
         const allhackthondata = await RequirmentHackthon.find({});
-        return res.status(200).json({"data": allhackthondata, status: true })
+        return res.status(200).json({ "data": allhackthondata, status: true })
 
     } catch (error) {
         console.log(error)
@@ -69,9 +70,9 @@ requirmentWorkRouter.get("/all-hackthon-requirment", async (req, res) => {
 
 requirmentWorkRouter.get("/all-project-requirment", async (req, res) => {
     try {
-     
+
         const allProjectdata = await RequirmentProject.find({});
-        return res.status(200).json({"data": allProjectdata, status: true })
+        return res.status(200).json({ "data": allProjectdata, status: true })
 
     } catch (error) {
         console.log(error)
@@ -80,10 +81,96 @@ requirmentWorkRouter.get("/all-project-requirment", async (req, res) => {
 
 })
 
-requirmentWorkRouter.delete('/delete-project/:id', fetchuer, async(req,res)=>{
-    const deletevent= await RequirmentProject.findByIdAndDelete(req.params.id);
-    
+requirmentWorkRouter.delete('/delete-project/:id', fetchuer, async (req, res) => {
+    try {
 
-})
+        // Find project
+        const project = await RequirmentProject.findById(req.params.id);
+
+        // Check project exists
+        if (!project) {
+            return res.status(404).json({
+                success: false,
+                message: 'Project not found'
+            });
+        }
+
+        // Security check
+        // if (project.user.toString() !== req.uid) {
+        //   return res.status(403).json({
+        //     success: false,
+        //     message: 'Unauthorized'
+        //   });
+        // }
+
+        // Delete all related applications
+        await userApplication.deleteMany({
+            eventId: req.params.id,
+            eventModel: 'RequirmentProject'
+        });
+
+        // Delete project
+        await RequirmentProject.findByIdAndDelete(req.params.id);
+
+        res.json({
+            success: true,
+            message: 'Project and related applications deleted successfully'
+        });
+
+    } catch (err) {
+
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+
+    }
+});
+
+requirmentWorkRouter.delete('/delete-hackthon/:id', fetchuer, async (req, res) => {
+    try {
+
+        // Find project
+        const project = await RequirmentHackthon.findById(req.params.id);
+
+        // Check project exists
+        if (!project) {
+            return res.status(404).json({
+                success: false,
+                message: 'Project not found'
+            });
+        }
+
+        // Security check
+        // if (project.user.toString() !== req.uid) {
+        //   return res.status(403).json({
+        //     success: false,
+        //     message: 'Unauthorized'
+        //   });
+        // }
+
+        // Delete all related applications
+        await userApplication.deleteMany({
+            eventId: req.params.id,
+            eventModel: 'RequirmentProject'
+        });
+
+        // Delete project
+        await RequirmentHackthon.findByIdAndDelete(req.params.id);
+
+        res.json({
+            success: true,
+            message: 'Hackthon and related applications deleted successfully'
+        });
+
+    } catch (err) {
+
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+
+    }
+});
 
 export default requirmentWorkRouter;

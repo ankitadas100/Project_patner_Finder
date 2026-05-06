@@ -10,7 +10,7 @@ export const handleSuccess = (msg) => {
     draggable: true,
     theme: "dark",
     style: {
-      background: "linear-gradient(135deg, #FF7A00, #ff8f1f)",
+      background: "linear-gradient(135deg, #FFC300, #ffd54b)",
       color: "#ffffff",
       fontWeight: "600",
       borderRadius: "12px",
@@ -33,7 +33,7 @@ export const handleError = (msg) => {
     theme: "dark",
     style: {
       background: "rgba(0,0,0,0.85)",
-      color: "#ff8f1f",
+      color: "#ffd54b",
       fontWeight: "600",
       borderRadius: "12px",
       padding: "14px 18px",

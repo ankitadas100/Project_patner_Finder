@@ -5,6 +5,7 @@ import { handleError } from '../Components/ErrorMessage';
 import { useParams, useNavigate } from 'react-router';
 import { Mail, GraduationCap, Github, Linkedin, Calendar, Code2, ArrowLeft, User } from 'lucide-react';
 import "../styles/profile.css"
+import backlogo from "../assets/backlogo.png"
 // --- NORMAL CSS ---
 const customStyles = `
 
@@ -117,7 +118,9 @@ export default function Profile() {
             <SkeletonProfile />
           ) : profileData ? (
             <div className="profile-card">
-              <div className="profile-banner"></div>
+              <div className="profile-banner">
+                <img src={backlogo}  style={{ height:'119px',width:"799px"}} alt="" />
+              </div>
               
               <div className="profile-content">
                 

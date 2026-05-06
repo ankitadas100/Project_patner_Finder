@@ -177,45 +177,46 @@ export default function Signup1() {
     }
   }
   const handlegithubauth = async () => {
-    try {
-      setloder2(true);
-      const data = await githubSignIn();
-      console.log(data.user)
-      const credential = GithubAuthProvider.credentialFromResult(data);
-      const accessToken = credential.accessToken;
-      console.log("Github Access Token:", accessToken);
-      const res = await fetch("https://api.github.com/user/emails", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          Accept: "application/vnd.github+json"
-        }
-      });
-      const email = await res.json();
-      // console.log(email[0]);
-      setfinalemail(email[0].email);
-const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/frisruserornot`
-      const responce = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ email: email[0].email })
-      });
-      const data1=await responce.json()
-      if(!data1.status){
-        setloder2(false)
-        return handleError("You already have an account.")
-      }
-     setemail(email[0].email)
+   return handleError('This is not ready')
+//     try {
+//       setloder2(true);
+//       const data = await githubSignIn();
+//       console.log(data.user)
+//       const credential = GithubAuthProvider.credentialFromResult(data);
+//       const accessToken = credential.accessToken;
+//       console.log("Github Access Token:", accessToken);
+//       const res = await fetch("https://api.github.com/user/emails", {
+//         method: "GET",
+//         headers: {
+//           Authorization: `Bearer ${accessToken}`,
+//           Accept: "application/vnd.github+json"
+//         }
+//       });
+//       const email = await res.json();
+//       // console.log(email[0]);
+//       setfinalemail(email[0].email);
+// const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/frisruserornot`
+//       const responce = await fetch(url, {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json"
+//         },
+//         body: JSON.stringify({ email: email[0].email })
+//       });
+//       const data1=await responce.json()
+//       if(!data1.status){
+//         setloder2(false)
+//         return handleError("You already have an account.")
+//       }
+//      setemail(email[0].email)
 
-     setloder2(false)
-     return naviget("/signup2") 
-    } catch (error) {
-      console.log(error)
-      handleError("Someing wrong. Try Again !")
-      return setloder2(false)
-    }
+//      setloder2(false)
+//      return naviget("/signup2") 
+//     } catch (error) {
+//       console.log(error)
+//       handleError("Someing wrong. Try Again !")
+//       return setloder2(false)
+//     }
   }
 
   return (

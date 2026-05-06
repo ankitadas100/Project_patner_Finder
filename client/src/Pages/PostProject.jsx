@@ -2,18 +2,19 @@ import React, { useEffect, useState } from 'react';
 import secureLocalStorage from 'react-secure-storage';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
-import { handleError } from '../Components/ErrorMessage';
-import { Users, Check, X, User, Clock, FolderGit2, Activity, Github, ArrowLeft, Trash2 } from 'lucide-react';
+import { handleError, handleSuccess } from '../Components/ErrorMessage';
+import { Users, Check, X, User, Clock, FolderGit2, Activity, Github, ArrowLeft, Trash2, AlertTriangle } from 'lucide-react';
 import "../styles/hackthonpost.css"
+
 // --- NORMAL CSS ---
 const customStyles = `
-.btn-reject,
+  .btn-reject,
   .btn-delete-post {
       background: transparent;
-      color: var(--danger);
-      border: 1px solid var(--danger-bg);
+      color: var(--danger, #ef4444);
+      border: 1px solid var(--danger-bg, #fee2e2);
   }
-        .btn-delete-post {
+  .btn-delete-post {
       padding: 6px 12px;
       border-radius: 6px;
       font-size: 0.85rem;
@@ -24,11 +25,101 @@ const customStyles = `
       gap: 6px;
       transition: all 0.2s;
   }
-
   .btn-delete-post:hover {
-      background: var(--danger);
+      background: var(--danger, #ef4444);
       color: #fff;
-      border-color: var(--danger);
+      border-color: var(--danger, #ef4444);
+  }
+
+  /* --- MODAL CSS --- */
+  .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(4px);
+  }
+  .modal-content {
+      background: var(--bg-card, #ffffff);
+      padding: 24px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 450px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      color: var(--text-dark, #1f2937);
+  }
+  .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--danger, #ef4444);
+      margin-bottom: 16px;
+  }
+  .modal-header h3 { margin: 0; font-size: 1.25rem; }
+  .modal-warning {
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+      line-height: 1.5;
+  }
+  .modal-form-group {
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+  }
+  .modal-checkbox-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+  }
+  .modal-input {
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      width: 100%;
+      font-size: 0.95rem;
+      background: transparent;
+      color: inherit;
+  }
+  .modal-input:focus {
+      outline: none;
+      border-color: var(--danger, #ef4444);
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+  }
+  .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 24px;
+  }
+  .btn-modal-cancel {
+      padding: 8px 16px;
+      border: 1px solid #d1d5db;
+      background: transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      color: inherit;
+  }
+  .btn-modal-cancel:hover { background: #f3f4f6; color: #111827; }
+  .btn-modal-delete {
+      padding: 8px 16px;
+      border: none;
+      background: var(--danger, #ef4444);
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: opacity 0.2s;
+  }
+  .btn-modal-delete:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
   }
 `;
 
@@ -60,6 +151,12 @@ export default function PostProject() {
     const { user } = useAuth();
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
+const [loder, setLoder] = useState(false)
+    // --- Modal State Variables ---
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [postToDelete, setPostToDelete] = useState(null);
+    const [deleteInputText, setDeleteInputText] = useState("");
+    const [isDeleteChecked, setIsDeleteChecked] = useState(false);
 
     useEffect(() => {
         const fetchAllData = async () => {
@@ -103,24 +200,65 @@ export default function PostProject() {
 
     // --- Handlers for Actions ---
     const handleGoBack = () => {
-        navigate(-1); // Goes back to the previous page
+        navigate(-1);
     };
 
-    const handleDeletePost = async (postId) => {
-        const isConfirmed = window.confirm("Are you sure you want to delete this project post? This action cannot be undone.");
+    // 1. Opens the Modal and sets the target post
+    const initiateDeletePost = (post) => {
+        setPostToDelete(post);
+        setDeleteInputText("");
+        setIsDeleteChecked(false);
+        setDeleteModalOpen(true);
+    };
 
-        if (isConfirmed) {
-            console.log("Deleting post ID:", postId);
-            // TODO: Add backend API call to delete the post from database
-            /*
-            try {
-              const response = await fetch(`BACKEND_URL/${postId}`, { method: 'DELETE', headers: ... });
-              if(response.ok) { ... }
-            } catch(error) { ... }
-            */
+    // 2. Closes Modal without doing anything
+    const closeDeleteModal = () => {
+        setDeleteModalOpen(false);
+        setPostToDelete(null);
+        setDeleteInputText("");
+        setIsDeleteChecked(false);
+    };
 
+    // 3. Final action that actually deletes
+    const confirmDeletePost = async () => {
+        if (!postToDelete) return;
+
+        // Double check validations just in case
+        if (!isDeleteChecked || deleteInputText !== postToDelete.ProjectTitle) {
+            return;
+        }
+
+        const postId = postToDelete._id;
+        console.log("Deleting post ID:", postId);
+
+        try {
+            setLoder(true)
+            // TODO: Call your backend API here
+            const token = await user?.getIdToken();
+            const localtoken = secureLocalStorage.getItem('auth-token');
+            let headers = { "Content-Type": "application/json" };
+            if (localtoken) {
+                headers["auth-token"] = localtoken;
+            } else if (token) {
+                headers["Authorization"] = `Bearer ${token}`;
+            }
+            const url = `${import.meta.env.VITE_BACKEND_URL}/api/v2/reqirment/delete-project/${postId}`;
+            const response = await fetch(url, {
+                method: "DELETE",
+                headers: headers,
+            });
+            handleSuccess('Delete Successful')
             // Optimistic UI update: Remove the post from the screen immediately
             setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
+
+            // Close the modal after successful deletion
+            closeDeleteModal();
+        } catch (error) {
+            console.error("Failed to delete", error);
+            handleError("Failed to delete the post.");
+        }
+        finally{
+            setLoder(false)
         }
     };
 
@@ -142,10 +280,63 @@ export default function PostProject() {
     return (
         <>
             <style>{customStyles}</style>
-            <div className="manager-container">
 
+            {/* --- DELETE CONFIRMATION MODAL --- */}
+            {deleteModalOpen && postToDelete && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <AlertTriangle size={24} />
+                            <h3>Delete Project Post</h3>
+                        </div>
+
+                        <p className="modal-warning">
+                            Are you sure you want to delete <strong>{postToDelete.ProjectTitle}</strong>?
+                            This action cannot be undone and all applicant data for this post will be lost.
+                        </p>
+
+                        <div className="modal-form-group">
+                            <label className="modal-checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={isDeleteChecked}
+                                    onChange={(e) => setIsDeleteChecked(e.target.checked)}
+                                />
+                                <span>I confirm that I want to permanently delete this project.</span>
+                            </label>
+                        </div>
+
+                        <div className="modal-form-group">
+                            <label style={{ fontSize: '0.9rem', marginBottom: '4px' }}>
+                                Please type <strong>{postToDelete.ProjectTitle}</strong> to confirm:
+                            </label>
+                            <input
+                                type="text"
+                                className="modal-input"
+                                placeholder={postToDelete.ProjectTitle}
+                                value={deleteInputText}
+                                onChange={(e) => setDeleteInputText(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="modal-actions">
+                            <button className="btn-modal-cancel" onClick={closeDeleteModal}>
+                                Cancel
+                            </button>
+                            <button
+                                className="btn-modal-delete"
+                                onClick={confirmDeletePost}
+                                disabled={!isDeleteChecked || deleteInputText !== postToDelete.ProjectTitle}
+                            >
+                                {loder ? <span className="loader-gg"></span> : "Final Delete"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="manager-container">
                 <div className="header-section">
-                    {/* Back Button Added Here */}
                     <div className="back-nav">
                         <button className="btn-back" onClick={handleGoBack}>
                             <ArrowLeft size={18} /> Back
@@ -158,25 +349,22 @@ export default function PostProject() {
 
                 <div className="posts-list">
                     {loading ? (
-                        // Show Skeletons
                         <>
                             <SkeletonPost />
                             <SkeletonPost />
                         </>
                     ) : posts.length > 0 ? (
-                        // Render Actual Posts
                         posts.map((post) => (
                             <div key={post._id} className="post-card">
-
-                                {/* Post Details Header */}
                                 <div className="post-card-header">
                                     <div className="post-info">
-                                        <div className="post-header-top" style={{display:"flex", justifyContent:"space-between"}}>
+                                        <div className="post-header-top" style={{ display: "flex", justifyContent: "space-between" }}>
                                             <h3>{post.ProjectTitle}</h3>
-                                            {/* Delete Event Button Added Here */}
+
+                                            {/* Changed onClick to trigger Modal */}
                                             <button
                                                 className="btn-delete-post"
-                                                onClick={() => handleDeletePost(post._id)}
+                                                onClick={() => initiateDeletePost(post)}
                                                 title="Delete this project post"
                                             >
                                                 <Trash2 size={16} /> Delete Post
@@ -211,7 +399,6 @@ export default function PostProject() {
                                     </div>
                                 </div>
 
-                                {/* Applicants List */}
                                 <div className="applicants-section">
                                     <h4 className="applicants-title">
                                         <Users size={18} /> Applications
@@ -221,7 +408,6 @@ export default function PostProject() {
                                         <div className="applicant-list">
                                             {post.applications.map((app) => (
                                                 <div key={app._id} className="applicant-row">
-
                                                     <div className="applicant-details">
                                                         <span className="applicant-email">
                                                             {app.applicant?.email || "Unknown User"}
@@ -244,7 +430,6 @@ export default function PostProject() {
                                                             <User size={14} /> Profile
                                                         </button>
 
-                                                        {/* Only show Accept/Reject if status is pending */}
                                                         {app.status === 'pending' && (
                                                             <>
                                                                 <button
@@ -262,7 +447,6 @@ export default function PostProject() {
                                                             </>
                                                         )}
                                                     </div>
-
                                                 </div>
                                             ))}
                                         </div>
@@ -272,11 +456,9 @@ export default function PostProject() {
                                         </div>
                                     )}
                                 </div>
-
                             </div>
                         ))
                     ) : (
-                        // Empty State
                         <div className="empty-state">
                             <FolderGit2 size={48} style={{ marginBottom: '16px', opacity: 0.5 }} />
                             <h3>No Project Posts Found</h3>
