@@ -5,8 +5,6 @@ import { connectDB } from "./db/db.js"
 import authRouter from "./routes/auth.js"
 import requirmentWorkRouter from "./routes/requirmentWork.js"
 import applicationRouter from "./routes/application.js"
-
-
 const app = express()
 app.use(express.json())
 app.use(cors())
