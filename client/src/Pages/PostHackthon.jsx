@@ -3,129 +3,34 @@ import secureLocalStorage from 'react-secure-storage';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 import { handleError, handleSuccess } from '../Components/ErrorMessage';
-import { Users, Check, X, User, Clock, Briefcase, ChevronRight, Trash2, ArrowLeft, AlertTriangle } from 'lucide-react';
+import { Users, Check, X, User, Clock, Briefcase, ChevronRight, Trash2, ArrowLeft, AlertTriangle, Info } from 'lucide-react';
 import '../styles/hackthonpost.css'
+
 // --- NORMAL CSS ---
 const customStyles = `
-.btn-reject,
-  .btn-delete-post {
-      background: transparent;
-      color: var(--danger);
-      border: 1px solid var(--danger-bg);
-  }
-        .btn-delete-post {
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s;
+  :root {
+      --bg-main: #0a0a0a;
+      --bg-card: #131313;
+      --bg-input: #1a1a1a;
+      --bg-input-hover: #1a1400;
+      --text-main: #ffffff;
+      --text-muted: #a3a3a3;
+      --text-dark: #888888;
+      --primary: #FFC300;
+      --primary-dark: #FF8C00;
+      --border-light: #2a2a2a;
+      --border-dark: #222222;
+      --border-primary: #664d00;
+      --border-input: #333333;
+
+      /* Action Colors for Accept/Reject */
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.1);
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.1);
   }
 
-  .btn-delete-post:hover {
-      background: var(--danger);
-      color: #fff;
-      border-color: var(--danger);
-  }
-        .btn-delete-post:hover {
-      background: var(--danger, #ef4444);
-      color: #fff;
-      border-color: var(--danger, #ef4444);
-  }
 
-  /* --- MODAL CSS --- */
-  .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      backdrop-filter: blur(4px);
-  }
-  .modal-content {
-      background: var(--bg-card, #ffffff);
-      padding: 24px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 450px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      color: var(--text-dark, #1f2937);
-  }
-  .modal-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--danger, #ef4444);
-      margin-bottom: 16px;
-  }
-  .modal-header h3 { margin: 0; font-size: 1.25rem; }
-  .modal-warning {
-      font-size: 0.95rem;
-      margin-bottom: 20px;
-      line-height: 1.5;
-  }
-  .modal-form-group {
-      margin-bottom: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-  }
-  .modal-checkbox-label {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      font-size: 0.9rem;
-      cursor: pointer;
-  }
-  .modal-input {
-      padding: 10px 12px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      width: 100%;
-      font-size: 0.95rem;
-      background: transparent;
-      color: inherit;
-  }
-  .modal-input:focus {
-      outline: none;
-      border-color: var(--danger, #ef4444);
-      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
-  }
-  .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      margin-top: 24px;
-  }
-  .btn-modal-cancel {
-      padding: 8px 16px;
-      border: 1px solid #d1d5db;
-      background: transparent;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-      color: inherit;
-  }
-  .btn-modal-cancel:hover { background: #f3f4f6; color: #111827; }
-  .btn-modal-delete {
-      padding: 8px 16px;
-      border: none;
-      background: var(--danger, #ef4444);
-      color: white;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-      transition: opacity 0.2s;
-  }
-  .btn-modal-delete:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-  }
 `;
 
 // --- SKELETON COMPONENT ---
@@ -155,12 +60,24 @@ export default function PostHackthon() {
     const { user } = useAuth();
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [loder, setLoder] = useState(false)
+    const [loder, setLoder] = useState(false);
 
+    // Delete Modal State
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [postToDelete, setPostToDelete] = useState(null);
     const [deleteInputText, setDeleteInputText] = useState("");
     const [isDeleteChecked, setIsDeleteChecked] = useState(false);
+
+    // Accept/Reject Modal State
+    const [actionModalOpen, setActionModalOpen] = useState(false);
+    const [actionConfig, setActionConfig] = useState({
+        type: '', // 'accept' or 'reject'
+        applicationId: null,
+        postId: null,
+        eventName: '',
+        email: ''
+    });
+    const [actionLoading, setActionLoading] = useState(false);
 
     useEffect(() => {
         const fetchAllData = async () => {
@@ -201,7 +118,10 @@ export default function PostHackthon() {
 
         fetchAllData();
     }, [user, navigate]);
-    // 1. Opens the Modal and sets the target post
+
+    // ----------------------------------------------------
+    // POST DELETION LOGIC
+    // ----------------------------------------------------
     const initiateDeletePost = (post) => {
         setPostToDelete(post);
         setDeleteInputText("");
@@ -209,7 +129,6 @@ export default function PostHackthon() {
         setDeleteModalOpen(true);
     };
 
-    // 2. Closes Modal without doing anything
     const closeDeleteModal = () => {
         setDeleteModalOpen(false);
         setPostToDelete(null);
@@ -217,89 +136,121 @@ export default function PostHackthon() {
         setIsDeleteChecked(false);
     };
 
-    // 3. Final action that actually deletes
     const confirmDeletePost = async () => {
         if (!postToDelete) return;
-
-        // Double check validations just in case
-        if (!isDeleteChecked || deleteInputText !== postToDelete.hackthonName) {
-            return;
-        }
+        if (!isDeleteChecked || deleteInputText !== postToDelete.hackthonName) return;
 
         const postId = postToDelete._id;
-        console.log("Deleting post ID:", postId);
-
         try {
-            // TODO: Call your backend API here
-            setLoder(true)
+            setLoder(true);
             const token = await user?.getIdToken();
             const localtoken = secureLocalStorage.getItem('auth-token');
             let headers = { "Content-Type": "application/json" };
-            if (localtoken) {
-                headers["auth-token"] = localtoken;
-            } else if (token) {
-                headers["Authorization"] = `Bearer ${token}`;
-            }
-            const url = `${import.meta.env.VITE_BACKEND_URL}/api/v2/reqirment/delete-hackthon/${postId}`;
-            const response = await fetch(url, {
-                method: "DELETE",
-                headers: headers,
-            });
-            handleSuccess('Delete Successful')
-            // Optimistic UI update: Remove the post from the screen immediately
-            setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
+            if (localtoken) headers["auth-token"] = localtoken;
+            else if (token) headers["Authorization"] = `Bearer ${token}`;
 
-            // Close the modal after successful deletion
+            const url = `${import.meta.env.VITE_BACKEND_URL}/api/v2/reqirment/delete-hackthon/${postId}`;
+            await fetch(url, { method: "DELETE", headers });
+            
+            handleSuccess('Delete Successful');
+            setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
             closeDeleteModal();
         } catch (error) {
-            console.error("Failed to delete", error);
             handleError("Failed to delete the post.");
-        }
-        finally {
-            setLoder(false)
+        } finally {
+            setLoder(false);
         }
     };
 
+    // ----------------------------------------------------
+    // APPLICATION ACCEPT/REJECT LOGIC
+    // ----------------------------------------------------
+    const handleAcceptClick = (applicationId, postId, eventName, email) => {
+        setActionConfig({ type: 'accept', applicationId, postId, eventName, email });
+        setActionModalOpen(true);
+    };
 
-    // --- Handlers for Actions ---
+    const handleRejectClick = (applicationId, postId, eventName, email) => {
+        setActionConfig({ type: 'reject', applicationId, postId, eventName, email });
+        setActionModalOpen(true);
+    };
+
+    const closeActionModal = () => {
+        setActionModalOpen(false);
+        setActionConfig({ type: '', applicationId: null, postId: null, eventName: '', email: '' });
+    };
+
+    const confirmApplicationAction = async () => {
+        setActionLoading(true);
+        const { type, applicationId, postId, eventName, email } = actionConfig;
+        
+        try {
+            const token = await user?.getIdToken();
+            const localtoken = secureLocalStorage.getItem('auth-token');
+            let headers = { "Content-Type": "application/json" };
+            if (localtoken) headers["auth-token"] = localtoken;
+            else if (token) headers["Authorization"] = `Bearer ${token}`;
+
+            const url = `${import.meta.env.VITE_BACKEND_URL}/api/v3/application/${type}-application/${applicationId}`;
+            
+            const response = await fetch(url, {
+                method: "PUT",
+                headers,
+                body: JSON.stringify({ eventName, email })
+            });
+            const data = await response.json();
+
+            if (response.ok && data.status) {
+                handleSuccess(`Applicant ${type}ed successfully! An email has been sent.`);
+                
+                // Optimistic UI update: change the status of the specific applicant
+                setPosts((prevPosts) => prevPosts.map((post) => {
+                    if (post._id === postId) {
+                        return {
+                            ...post,
+                            applications: post.applications.map((app) => 
+                                app._id === applicationId ? { ...app, status: `${type}ed` } : app
+                            )
+                        };
+                    }
+                    return post;
+                }));
+                closeActionModal();
+            } else {
+                handleError(data.msg || `Failed to ${type} application`);
+            }
+        } catch (error) {
+            console.error(error);
+            handleError("Something went wrong. Please try again.");
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
     const handleViewProfile = (applicantId) => {
-        console.log("Navigating to profile:", applicantId);
         navigate(`/profile/${applicantId}`);
     };
 
-    const handleAccept = async (applicationId, postId) => {
-        console.log("Accepting application:", applicationId);
-        // TODO: Add backend API call to update status to "accepted"
-    };
-
-    const handleReject = async (applicationId, postId) => {
-        console.log("Rejecting application:", applicationId);
-        // TODO: Add backend API call to update status to "rejected"
-    };
-
-    const handleDeletePost = (postId) => {
-        console.log(postId)
-    }
     const handleGoBack = () => {
-        navigate(-1); // Goes back to the previous page
+        navigate(-1);
     };
 
     return (
         <>
             <style>{customStyles}</style>
+
+            {/* DELETE POST MODAL */}
             {deleteModalOpen && postToDelete && (
                 <div className="modal-overlay">
                     <div className="modal-content">
-                        <div className="modal-header">
+                        <div className="modal-header danger">
                             <AlertTriangle size={24} />
                             <h3>Delete Hackthon Post</h3>
                         </div>
-
                         <p className="modal-warning">
                             Are you sure you want to delete <strong>{postToDelete.hackthonName}</strong>?
                             This action cannot be undone and all applicant data for this post will be lost.
                         </p>
-
                         <div className="modal-form-group">
                             <label className="modal-checkbox-label">
                                 <input
@@ -310,7 +261,6 @@ export default function PostHackthon() {
                                 <span>I confirm that I want to permanently delete this project.</span>
                             </label>
                         </div>
-
                         <div className="modal-form-group">
                             <label style={{ fontSize: '0.9rem', marginBottom: '4px' }}>
                                 Please type <strong>{postToDelete.hackthonName}</strong> to confirm:
@@ -323,7 +273,6 @@ export default function PostHackthon() {
                                 onChange={(e) => setDeleteInputText(e.target.value)}
                             />
                         </div>
-
                         <div className="modal-actions">
                             <button className="btn-modal-cancel" onClick={closeDeleteModal}>
                                 Cancel
@@ -331,7 +280,7 @@ export default function PostHackthon() {
                             <button
                                 className="btn-modal-delete"
                                 onClick={confirmDeletePost}
-                                disabled={!isDeleteChecked || deleteInputText !== postToDelete.hackthonName}
+                                disabled={!isDeleteChecked || deleteInputText !== postToDelete.hackthonName || loder}
                             >
                                 {loder ? <span className="loader-gg"></span> : "Final Delete"}
                             </button>
@@ -339,9 +288,38 @@ export default function PostHackthon() {
                     </div>
                 </div>
             )}
+
+            {/* ACCEPT / REJECT APPLICATION MODAL */}
+            {actionModalOpen && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <div className={`modal-header ${actionConfig.type === 'accept' ? 'success' : 'danger'}`}>
+                            {actionConfig.type === 'accept' ? <Check size={24} /> : <X size={24} />}
+                            <h3>{actionConfig.type === 'accept' ? 'Accept' : 'Reject'} Applicant</h3>
+                        </div>
+                        <p className="modal-warning">
+                            Are you sure you want to <strong>{actionConfig.type}</strong> the application from 
+                            <strong> {actionConfig.email}</strong> for the project <strong>{actionConfig.eventName}</strong>?
+                            <br/><br/>
+                            An automated email will be sent to the user notifying them of this decision.
+                        </p>
+                        <div className="modal-actions">
+                            <button className="btn-modal-cancel" onClick={closeActionModal} disabled={actionLoading}>
+                                Cancel
+                            </button>
+                            <button
+                                className={actionConfig.type === 'accept' ? 'btn-modal-accept' : 'btn-modal-delete'}
+                                onClick={confirmApplicationAction}
+                                disabled={actionLoading}
+                            >
+                                {actionLoading ? <span className="loader-gg"></span> : `Confirm ${actionConfig.type.charAt(0).toUpperCase() + actionConfig.type.slice(1)}`}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="manager-container">
-
-
                 <div className="header-section">
                     <div className="back-nav">
                         <button className="btn-back" onClick={handleGoBack}>
@@ -354,16 +332,13 @@ export default function PostHackthon() {
 
                 <div className="posts-list">
                     {loading ? (
-                        // Show Skeletons
                         <>
                             <SkeletonPost />
                             <SkeletonPost />
                         </>
                     ) : posts.length > 0 ? (
-                        // Render Actual Posts
                         posts.map((post) => (
                             <div key={post._id} className="post-card">
-
                                 {/* Post Details Header */}
                                 <div className="post-card-header">
                                     <div className="post-info">
@@ -376,7 +351,6 @@ export default function PostHackthon() {
                                             >
                                                 <Trash2 size={16} /> Delete Post
                                             </button>
-
                                         </div>
                                         <div className="post-meta">
                                             <span className="post-meta-item">
@@ -404,7 +378,6 @@ export default function PostHackthon() {
                                         <div className="applicant-list">
                                             {post.applications.map((app) => (
                                                 <div key={app._id} className="applicant-row">
-
                                                     <div className="applicant-details">
                                                         <span className="applicant-email">
                                                             {app.applicant?.email || "Unknown User"}
@@ -432,20 +405,19 @@ export default function PostHackthon() {
                                                             <>
                                                                 <button
                                                                     className="btn btn-accept"
-                                                                    onClick={() => handleAccept(app._id, post._id)}
+                                                                    onClick={() => handleAcceptClick(app._id, post._id, post.hackthonName, app.applicant?.email)}
                                                                 >
                                                                     <Check size={14} /> Accept
                                                                 </button>
                                                                 <button
                                                                     className="btn btn-reject"
-                                                                    onClick={() => handleReject(app._id, post._id)}
+                                                                    onClick={() => handleRejectClick(app._id, post._id, post.hackthonName, app.applicant?.email)}
                                                                 >
                                                                     <X size={14} /> Reject
                                                                 </button>
                                                             </>
                                                         )}
                                                     </div>
-
                                                 </div>
                                             ))}
                                         </div>
@@ -455,11 +427,9 @@ export default function PostHackthon() {
                                         </div>
                                     )}
                                 </div>
-
                             </div>
                         ))
                     ) : (
-                        // Empty State
                         <div className="empty-state">
                             <Briefcase size={48} style={{ marginBottom: '16px', opacity: 0.5 }} />
                             <h3>No Hackathon Posts Found</h3>

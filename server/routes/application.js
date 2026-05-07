@@ -5,6 +5,8 @@ import User from '../models/User.js';
 import mongoose from 'mongoose';
 import RequirmentHackthon from '../models/RequirmentHackthon.js';
 import RequirmentProject from '../models/RequirmentProject.js';
+import sendAcceptanceEmail from '../middlewares/sendAcceptMail.js';
+import sendRejectionEmail from '../middlewares/sendRejactmail.js';
 
 const applicationRouter = express.Router();
 
@@ -214,7 +216,51 @@ applicationRouter.get('/user-project-posts-with-applicants', fetchuer, async (re
         res.json({ success: true, data: projects });
 
     } catch (err) {
+        console.log(err)
         res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+applicationRouter.put('/accept-application/:id', fetchuer, async (req, res) => {
+    try {
+        const {eventName,email}=req.body;
+        const isValidId = await userApplication.findById(req.params.id);
+        const updateData = {
+            status: 'accepted'
+        }
+        if (isValidId.length == 0) {
+            return res.status(404).json({ "msg": "Not found", status: false })
+        }
+        const update = await userApplication.findByIdAndUpdate(req.params.id, { $set: updateData }, { new: true })
+        const sendmail= await sendAcceptanceEmail(email,eventName)
+        return res.status(202).json({ "msg": "Accepted", status: true })
+
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ success: false, message: err.message });
+
+    }
+
+
+});
+applicationRouter.put('/reject-application/:id', fetchuer, async (req, res) => {
+    try {
+        const isValidId = await userApplication.findById(req.params.id);
+        const {eventName,email}=req.body;
+        const updateData = {
+            status: 'rejected'
+        }
+        if (isValidId.length == 0) {
+            return res.status(404).json({ "msg": "Not found", status: false })
+        }
+        const update = await userApplication.findByIdAndUpdate(req.params.id, { $set: updateData }, { new: true })
+        const sendmail = await sendRejectionEmail(email,eventName)
+        return res.status(202).json({ "msg": "rejected", status: true })
+
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ success: false, message: err.message });
+
     }
 });
 export default applicationRouter;

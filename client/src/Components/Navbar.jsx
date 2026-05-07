@@ -375,7 +375,7 @@ const handlelogout=async()=>{
           {/* Logo */}
           <Link to="/" className="nb-logo">
             <img className="logo-style" style={{ height: "78px", width: "78px" }} src={logo} alt="" />
-            <div className="nb-logo-text"> <span>Dev</span><span style={{ color: "#e1a203" }}>forge</span></div>
+            <div className="nb-logo-text"> <span>Dev</span><span style={{ color: "#e1a203" }}>mate</span></div>
           </Link>
 
           {/* Desktop Links */}

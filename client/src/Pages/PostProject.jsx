@@ -8,13 +8,38 @@ import "../styles/hackthonpost.css"
 
 // --- NORMAL CSS ---
 const customStyles = `
-  .btn-reject,
-  .btn-delete-post {
-      background: transparent;
-      color: var(--danger, #ef4444);
-      border: 1px solid var(--danger-bg, #fee2e2);
+  :root {
+      --bg-main: #0a0a0a;
+      --bg-card: #131313;
+      --bg-input: #1a1a1a;
+      --bg-input-hover: #1a1400;
+      --text-main: #ffffff;
+      --text-muted: #a3a3a3;
+      --text-dark: #888888;
+      --primary: #FFC300;
+      --primary-dark: #FF8C00;
+      --border-light: #2a2a2a;
+      --border-dark: #222222;
+      --border-primary: #664d00;
+      --border-input: #333333;
+
+      /* Action Colors for Accept/Reject */
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.1);
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.1);
   }
-  .btn-delete-post {
+
+  .btn-reject, .btn-delete-post {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid var(--danger-bg);
+  }
+  
+  .btn-accept {
+      background: transparent;
+      color: var(--success);
+      border: 1px solid var(--success-bg);
       padding: 6px 12px;
       border-radius: 6px;
       font-size: 0.85rem;
@@ -25,17 +50,36 @@ const customStyles = `
       gap: 6px;
       transition: all 0.2s;
   }
-  .btn-delete-post:hover {
-      background: var(--danger, #ef4444);
+  
+  .btn-accept:hover {
+      background: var(--success);
       color: #fff;
-      border-color: var(--danger, #ef4444);
+      border-color: var(--success);
+  }
+
+  .btn-delete-post, .btn-reject {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+  }
+
+  .btn-delete-post:hover, .btn-reject:hover {
+      background: var(--danger);
+      color: #fff;
+      border-color: var(--danger);
   }
 
   /* --- MODAL CSS --- */
   .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.7);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -43,26 +87,30 @@ const customStyles = `
       backdrop-filter: blur(4px);
   }
   .modal-content {
-      background: var(--bg-card, #ffffff);
+      background: var(--bg-card);
       padding: 24px;
       border-radius: 12px;
       width: 90%;
       max-width: 450px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      color: var(--text-dark, #1f2937);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      color: var(--text-main);
+      border: 1px solid var(--border-light);
   }
   .modal-header {
       display: flex;
       align-items: center;
       gap: 10px;
-      color: var(--danger, #ef4444);
       margin-bottom: 16px;
   }
-  .modal-header h3 { margin: 0; font-size: 1.25rem; }
+  .modal-header.danger { color: var(--danger); }
+  .modal-header.success { color: var(--success); }
+  
+  .modal-header h3 { margin: 0; font-size: 1.25rem; color: var(--text-main); }
   .modal-warning {
       font-size: 0.95rem;
       margin-bottom: 20px;
       line-height: 1.5;
+      color: var(--text-muted);
   }
   .modal-form-group {
       margin-bottom: 16px;
@@ -76,20 +124,21 @@ const customStyles = `
       gap: 8px;
       font-size: 0.9rem;
       cursor: pointer;
+      color: var(--text-muted);
   }
   .modal-input {
       padding: 10px 12px;
-      border: 1px solid #d1d5db;
+      border: 1px solid var(--border-input);
       border-radius: 6px;
       width: 100%;
       font-size: 0.95rem;
-      background: transparent;
-      color: inherit;
+      background: var(--bg-input);
+      color: var(--text-main);
   }
   .modal-input:focus {
       outline: none;
-      border-color: var(--danger, #ef4444);
-      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+      border-color: var(--primary);
+      background: var(--bg-input-hover);
   }
   .modal-actions {
       display: flex;
@@ -99,25 +148,36 @@ const customStyles = `
   }
   .btn-modal-cancel {
       padding: 8px 16px;
-      border: 1px solid #d1d5db;
+      border: 1px solid var(--border-input);
       background: transparent;
       border-radius: 6px;
       cursor: pointer;
       font-weight: 500;
-      color: inherit;
+      color: var(--text-muted);
   }
-  .btn-modal-cancel:hover { background: #f3f4f6; color: #111827; }
+  .btn-modal-cancel:hover { background: var(--bg-input); color: var(--text-main); }
+  
   .btn-modal-delete {
       padding: 8px 16px;
       border: none;
-      background: var(--danger, #ef4444);
+      background: var(--danger);
       color: white;
       border-radius: 6px;
       cursor: pointer;
       font-weight: 500;
       transition: opacity 0.2s;
   }
-  .btn-modal-delete:disabled {
+  .btn-modal-accept {
+      padding: 8px 16px;
+      border: none;
+      background: var(--success);
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: opacity 0.2s;
+  }
+  .btn-modal-delete:disabled, .btn-modal-accept:disabled {
       opacity: 0.5;
       cursor: not-allowed;
   }
@@ -151,12 +211,24 @@ export default function PostProject() {
     const { user } = useAuth();
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
-const [loder, setLoder] = useState(false)
-    // --- Modal State Variables ---
+    const [loder, setLoder] = useState(false);
+
+    // --- Delete Modal State Variables ---
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [postToDelete, setPostToDelete] = useState(null);
     const [deleteInputText, setDeleteInputText] = useState("");
     const [isDeleteChecked, setIsDeleteChecked] = useState(false);
+
+    // --- Accept/Reject Modal State Variables ---
+    const [actionModalOpen, setActionModalOpen] = useState(false);
+    const [actionConfig, setActionConfig] = useState({
+        type: '', // 'accept' or 'reject'
+        applicationId: null,
+        postId: null,
+        eventName: '',
+        email: ''
+    });
+    const [actionLoading, setActionLoading] = useState(false);
 
     useEffect(() => {
         const fetchAllData = async () => {
@@ -198,12 +270,13 @@ const [loder, setLoder] = useState(false)
         fetchAllData();
     }, [user, navigate]);
 
-    // --- Handlers for Actions ---
     const handleGoBack = () => {
         navigate(-1);
     };
 
-    // 1. Opens the Modal and sets the target post
+    // ----------------------------------------------------
+    // POST DELETION LOGIC
+    // ----------------------------------------------------
     const initiateDeletePost = (post) => {
         setPostToDelete(post);
         setDeleteInputText("");
@@ -211,7 +284,6 @@ const [loder, setLoder] = useState(false)
         setDeleteModalOpen(true);
     };
 
-    // 2. Closes Modal without doing anything
     const closeDeleteModal = () => {
         setDeleteModalOpen(false);
         setPostToDelete(null);
@@ -219,11 +291,9 @@ const [loder, setLoder] = useState(false)
         setIsDeleteChecked(false);
     };
 
-    // 3. Final action that actually deletes
     const confirmDeletePost = async () => {
         if (!postToDelete) return;
 
-        // Double check validations just in case
         if (!isDeleteChecked || deleteInputText !== postToDelete.ProjectTitle) {
             return;
         }
@@ -232,8 +302,7 @@ const [loder, setLoder] = useState(false)
         console.log("Deleting post ID:", postId);
 
         try {
-            setLoder(true)
-            // TODO: Call your backend API here
+            setLoder(true);
             const token = await user?.getIdToken();
             const localtoken = secureLocalStorage.getItem('auth-token');
             let headers = { "Content-Type": "application/json" };
@@ -242,39 +311,92 @@ const [loder, setLoder] = useState(false)
             } else if (token) {
                 headers["Authorization"] = `Bearer ${token}`;
             }
+            
             const url = `${import.meta.env.VITE_BACKEND_URL}/api/v2/reqirment/delete-project/${postId}`;
             const response = await fetch(url, {
                 method: "DELETE",
                 headers: headers,
             });
-            handleSuccess('Delete Successful')
-            // Optimistic UI update: Remove the post from the screen immediately
+            
+            handleSuccess('Delete Successful');
             setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
-
-            // Close the modal after successful deletion
             closeDeleteModal();
         } catch (error) {
             console.error("Failed to delete", error);
             handleError("Failed to delete the post.");
+        } finally {
+            setLoder(false);
         }
-        finally{
-            setLoder(false)
+    };
+
+    // ----------------------------------------------------
+    // APPLICATION ACCEPT/REJECT LOGIC
+    // ----------------------------------------------------
+    const handleAcceptClick = (applicationId, postId, eventName, email) => {
+        setActionConfig({ type: 'accept', applicationId, postId, eventName, email });
+        setActionModalOpen(true);
+    };
+
+    const handleRejectClick = (applicationId, postId, eventName, email) => {
+        setActionConfig({ type: 'reject', applicationId, postId, eventName, email });
+        setActionModalOpen(true);
+    };
+
+    const closeActionModal = () => {
+        setActionModalOpen(false);
+        setActionConfig({ type: '', applicationId: null, postId: null, eventName: '', email: '' });
+    };
+
+    const confirmApplicationAction = async () => {
+        setActionLoading(true);
+        const { type, applicationId, postId, eventName, email } = actionConfig;
+        
+        try {
+            const token = await user?.getIdToken();
+            const localtoken = secureLocalStorage.getItem('auth-token');
+            let headers = { "Content-Type": "application/json" };
+            if (localtoken) headers["auth-token"] = localtoken;
+            else if (token) headers["Authorization"] = `Bearer ${token}`;
+
+            const url = `${import.meta.env.VITE_BACKEND_URL}/api/v3/application/${type}-application/${applicationId}`;
+            
+            const response = await fetch(url, {
+                method: "PUT",
+                headers,
+                body: JSON.stringify({ eventName, email })
+            });
+            const data = await response.json();
+
+            if (response.ok && data.status) {
+                handleSuccess(`Applicant ${type}ed successfully! An email has been sent.`);
+                
+                // Optimistic UI update: change the status of the specific applicant
+                setPosts((prevPosts) => prevPosts.map((post) => {
+                    if (post._id === postId) {
+                        return {
+                            ...post,
+                            applications: post.applications.map((app) => 
+                                app._id === applicationId ? { ...app, status: `${type}ed` } : app
+                            )
+                        };
+                    }
+                    return post;
+                }));
+                closeActionModal();
+            } else {
+                handleError(data.msg || `Failed to ${type} application`);
+            }
+        } catch (error) {
+            console.error(error);
+            handleError("Something went wrong. Please try again.");
+        } finally {
+            setActionLoading(false);
         }
     };
 
     const handleViewProfile = (applicantId) => {
         console.log("Navigating to profile:", applicantId);
         navigate(`/profile/${applicantId}`);
-    };
-
-    const handleAccept = async (applicationId, postId) => {
-        console.log("Accepting application:", applicationId);
-        // TODO: Add backend API call to update status to "accepted"
-    };
-
-    const handleReject = async (applicationId, postId) => {
-        console.log("Rejecting application:", applicationId);
-        // TODO: Add backend API call to update status to "rejected"
     };
 
     return (
@@ -285,7 +407,7 @@ const [loder, setLoder] = useState(false)
             {deleteModalOpen && postToDelete && (
                 <div className="modal-overlay">
                     <div className="modal-content">
-                        <div className="modal-header">
+                        <div className="modal-header danger">
                             <AlertTriangle size={24} />
                             <h3>Delete Project Post</h3>
                         </div>
@@ -326,9 +448,39 @@ const [loder, setLoder] = useState(false)
                             <button
                                 className="btn-modal-delete"
                                 onClick={confirmDeletePost}
-                                disabled={!isDeleteChecked || deleteInputText !== postToDelete.ProjectTitle}
+                                disabled={!isDeleteChecked || deleteInputText !== postToDelete.ProjectTitle || loder}
                             >
                                 {loder ? <span className="loader-gg"></span> : "Final Delete"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* --- ACCEPT / REJECT APPLICATION MODAL --- */}
+            {actionModalOpen && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <div className={`modal-header ${actionConfig.type === 'accept' ? 'success' : 'danger'}`}>
+                            {actionConfig.type === 'accept' ? <Check size={24} /> : <X size={24} />}
+                            <h3>{actionConfig.type === 'accept' ? 'Accept' : 'Reject'} Applicant</h3>
+                        </div>
+                        <p className="modal-warning">
+                            Are you sure you want to <strong>{actionConfig.type}</strong> the application from 
+                            <strong> {actionConfig.email}</strong> for the project <strong>{actionConfig.eventName}</strong>?
+                            <br/><br/>
+                            An automated email will be sent to the user notifying them of this decision.
+                        </p>
+                        <div className="modal-actions">
+                            <button className="btn-modal-cancel" onClick={closeActionModal} disabled={actionLoading}>
+                                Cancel
+                            </button>
+                            <button
+                                className={actionConfig.type === 'accept' ? 'btn-modal-accept' : 'btn-modal-delete'}
+                                onClick={confirmApplicationAction}
+                                disabled={actionLoading}
+                            >
+                                {actionLoading ? <span className="loader-gg"></span> : `Confirm ${actionConfig.type.charAt(0).toUpperCase() + actionConfig.type.slice(1)}`}
                             </button>
                         </div>
                     </div>
@@ -361,7 +513,6 @@ const [loder, setLoder] = useState(false)
                                         <div className="post-header-top" style={{ display: "flex", justifyContent: "space-between" }}>
                                             <h3>{post.ProjectTitle}</h3>
 
-                                            {/* Changed onClick to trigger Modal */}
                                             <button
                                                 className="btn-delete-post"
                                                 onClick={() => initiateDeletePost(post)}
@@ -434,13 +585,13 @@ const [loder, setLoder] = useState(false)
                                                             <>
                                                                 <button
                                                                     className="btn btn-accept"
-                                                                    onClick={() => handleAccept(app._id, post._id)}
+                                                                    onClick={() => handleAcceptClick(app._id, post._id, post.ProjectTitle, app.applicant?.email)}
                                                                 >
                                                                     <Check size={14} /> Accept
                                                                 </button>
                                                                 <button
                                                                     className="btn btn-reject"
-                                                                    onClick={() => handleReject(app._id, post._id)}
+                                                                    onClick={() => handleRejectClick(app._id, post._id, post.ProjectTitle, app.applicant?.email)}
                                                                 >
                                                                     <X size={14} /> Reject
                                                                 </button>
