@@ -500,10 +500,10 @@ const handlelogout=async()=>{
                   <Link to="/settings" className="nb-profile-item" style={{ padding: "8px 0" }}>
                     <Settings size={18} /> Account settings
                   </Link>
-                  <Link to="/settings" className="nb-profile-item" style={{ padding: "8px 0" }}>
+                  <Link to="/post" className="nb-profile-item" style={{ padding: "8px 0" }}>
                     <Globe size={18} />Your Post
                   </Link>
-                  <Link to="/settings" className="nb-profile-item" style={{ padding: "8px 0" }}>
+                  <Link to="/application" className="nb-profile-item" style={{ padding: "8px 0" }}>
                     <Pencil size={18} /> Your Application
                   </Link>
                   <button className="nb-profile-item logout" onClick={() => setIsLogin(false)} style={{ padding: "8px 0" }}>
