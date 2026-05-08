@@ -64,6 +64,7 @@ authRouter.post("/otpverify", async (req, res) => {
 authRouter.post("/register", upload.single('profilepic'), async (req, res) => {
     try {
         const { fullname, password, email, collagename, bio, skill, githublink, linkedinlink, protfolio } = JSON.parse(req.body.userinfo);
+        console.log(protfolio)
         const IsFristUser = User.findOne({ email: email });
         if (!IsFristUser) {
             return res.status(400).json({ "message": "Already have an account.", status: false })
@@ -88,7 +89,7 @@ authRouter.post("/register", upload.single('profilepic'), async (req, res) => {
             skill,
             githublink,
             linkedinlink,
-            protfolio,
+            protfolio:protfolio,
             password: haspass
         })
         await newuser.save();

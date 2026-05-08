@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import secureLocalStorage from 'react-secure-storage';
 import { handleError } from '../Components/ErrorMessage';
 import { useParams, useNavigate } from 'react-router';
-import { Mail, GraduationCap, Github, Linkedin, Calendar, Code2, ArrowLeft, User } from 'lucide-react';
+import { Mail, GraduationCap, Github, Linkedin, Calendar, Code2, ArrowLeft, User, Globe } from 'lucide-react';
 import "../styles/profile.css"
 import backlogo from "../assets/backlogo.png"
 // --- NORMAL CSS ---
@@ -144,6 +144,11 @@ export default function Profile() {
                     {profileData.linkedinlink && (
                       <a href={profileData.linkedinlink} target="_blank" rel="noopener noreferrer" className="social-btn" title="LinkedIn">
                         <Linkedin size={20} />
+                      </a>
+                    )}
+                    {profileData.protfolio && (
+                      <a href={profileData.protfolio} target="_blank" rel="noopener noreferrer" className="social-btn" title="LinkedIn">
+                        <Globe size={20} />
                       </a>
                     )}
                   </div>

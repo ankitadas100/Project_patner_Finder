@@ -256,9 +256,9 @@ export default function ViewAllRequirment() {
                     <div key={project._id} className="card">
                       <div className="card-header">
                         <h3 className="card-title">{project.hackthonName}</h3>
-                        <div className="icon-box">
-                          <Briefcase size={20} />
-                        </div>
+                       <a href={`${project.hackthonWebsiteLink}`} target='_blank'>  <div className="icon-box">
+                          <Globe  size={20} />
+                        </div></a>
                       </div>
 
                       <div className="card-section">

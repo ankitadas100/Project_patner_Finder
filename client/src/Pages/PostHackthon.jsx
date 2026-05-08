@@ -106,7 +106,7 @@ export default function PostHackthon() {
 
                 const data = await response.json();
                 if (data.success) {
-                    setPosts(data.data);
+                    setPosts(data.data.reverse());
                 }
             } catch (error) {
                 console.error("Fetch error:", error);
