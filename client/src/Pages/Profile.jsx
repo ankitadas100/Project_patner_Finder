@@ -21,6 +21,7 @@ const SkeletonProfile = () => (
         <div className="social-links">
           <div className="skeleton" style={{ width: '40px', height: '40px', borderRadius: '8px' }}></div>
           <div className="skeleton" style={{ width: '40px', height: '40px', borderRadius: '8px' }}></div>
+          <div className="skeleton" style={{ width: '40px', height: '40px', borderRadius: '8px' }}></div>
         </div>
       </div>
       <div className="profile-right">
