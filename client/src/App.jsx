@@ -98,8 +98,6 @@ function App() {
           <Route path='/post/hackthon' element={<PostHackthon/>}/>
           <Route path='/post/project' element={<PostProject/>}/>
           <Route path='/profile/:id' element={<Profile/>}/>
-
-
         </Routes>
         <Footer/>
       </BrowserRouter>
