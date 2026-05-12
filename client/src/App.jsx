@@ -91,7 +91,6 @@ function App() {
           <Route path='/Signup2' element={<Signup2 />} />
           <Route path='/login' element={<Login />} />
           <Route path='/postrequiremen' element={<Requirment />} />
-          <Route path='/aboutrequirment/:id' element={<HackathonDetail/>}/>
           <Route path='/viewallhackthonrequirment' element={<ViewAllRequirment/>}/>
           <Route path='/viewallprojectrequirment' element={<ViewAllProjectRequirment/>}/>
           <Route path='/application' element={<UserApplication/>}/>
