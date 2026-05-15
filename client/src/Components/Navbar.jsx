@@ -498,7 +498,7 @@ const handlelogout=async()=>{
                   </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <Link to="/settings" className="nb-profile-item" style={{ padding: "8px 0" }}>
+                  <Link to="/accountsettings" className="nb-profile-item" style={{ padding: "8px 0" }}>
                     <Settings size={18} /> Account settings
                   </Link>
                   <Link to="/post" className="nb-profile-item" style={{ padding: "8px 0" }}>
