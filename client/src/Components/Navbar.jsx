@@ -33,6 +33,7 @@ export default function Navbar() {
         setProfileMenuOpen(false);
       }
     }
+    console.log(useralldata)
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -421,7 +422,7 @@ const handlelogout=async()=>{
                   
                   <ul className="nb-profile-menu">
                     <li>
-                      <Link to="/settings" className="nb-profile-item">
+                      <Link to="/accountsettings" className="nb-profile-item">
                         <Settings size={18} /> Account settings
                       </Link>
                     </li>

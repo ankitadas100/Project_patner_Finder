@@ -24,6 +24,7 @@ import Post from './Pages/Post';
 import PostHackthon from './Pages/PostHackthon';
 import PostProject from './Pages/PostProject';
 import Profile from './Pages/Profile';
+import AccountSetting from './Pages/AccountSetting';
 
 function App() {
   const { user } = useAuth()
@@ -95,6 +96,7 @@ function App() {
           <Route path='/viewallprojectrequirment' element={<ViewAllProjectRequirment/>}/>
           <Route path='/application' element={<UserApplication/>}/>
           <Route path='/post' element={<Post/>}/>
+          <Route path='/accountsettings' element={<AccountSetting/>}/>
           <Route path='/post/hackthon' element={<PostHackthon/>}/>
           <Route path='/post/project' element={<PostProject/>}/>
           <Route path='/profile/:id' element={<Profile/>}/>

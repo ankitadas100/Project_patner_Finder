@@ -194,4 +194,71 @@ authRouter.get("/getuserprofile/:id", fetchuer, async (req, res) => {
 
 
 })
+authRouter.get('/view-profile-account', fetchuer, async (req, res) => {
+  try {
+
+    const finduser = await User
+      .findOne({ email: req.email })
+      .select("-password");
+
+    if (!finduser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    const useridview = await proflieViews.aggregate([
+
+      {
+        $match: {
+          profileid: finduser._id
+        }
+      },
+
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'whoviewid',
+          foreignField: '_id',
+          as: 'viewer'
+        }
+      },
+
+      {
+        $unwind: '$viewer'
+      },
+
+      {
+        $project: {
+          _id: 1,
+          profileid: 1,
+          createdAt: 1,
+
+          viewer: {
+            _id: '$viewer._id',
+            fullname: '$viewer.fullname',
+            email: '$viewer.email',
+            time: '$viewer.updatedAt',
+            proflie_url: '$viewer.image_url',
+          }
+        }
+      }
+
+    ]);
+
+    res.status(200).json({
+      success: true,
+      useridview
+    });
+
+  } catch (err) {
+
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+
+  }
+});
 export default authRouter;
