@@ -155,46 +155,84 @@ authRouter.get("/getuser", fetchuer, async (req, res) => {
 
     }
 })
-
 authRouter.get("/getuserprofile/:id", fetchuer, async (req, res) => {
+
     try {
-  
-        console.log("Yes")
-        const email = req.email;
-        const finduser = await User.findOne({ email: email }).select("-password")
-        const userdata = await User.findById(req.params.id)
-        if (!userdata) {
-            return res.status(404).json({ 'msg': "User not found", status: false })
-        }
-        const isViews = await proflieViews.find({
-            profileid: new mongoose.Types.ObjectId(req.params.id),
-            whoviewid: finduser._id
 
-        })
-        if (isViews.length == 0) {
-            const newViews = new proflieViews({
-                profileid: new mongoose.Types.ObjectId(req.params.id),
-                whoviewid: finduser._id
-            })
-            newViews.save();
-        }
-        const updateData = {
-            profileid: new mongoose.Types.ObjectId(req.params.id),
-            whoviewid: finduser._id
-        };
-        const updatethedata = await User.findByIdAndUpdate(req.params.id, { $set: updateData }, { new: true })
+        // Current logged in user
+        const currentUser = await User
+            .findOne({ email: req.email })
+            .select("-password");
 
-        return res.status(200).json({ 'data': userdata, status: true })
+        if (!currentUser) {
+            return res.status(404).json({
+                success: false,
+                message: "Current user not found"
+            });
+        }
+
+        // Profile user
+        const profileUser = await User
+            .findById(req.params.id)
+            .select("-password");
+
+        if (!profileUser) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        // Prevent self profile view count
+        if (currentUser._id.toString() !== req.params.id) {
+
+            // Create if not exists
+            // Update updatedAt if already exists
+            await proflieViews.findOneAndUpdate(
+
+                {
+                    profileid: profileUser._id,
+                    whoviewid: currentUser._id
+                },
+
+                {},
+
+                {
+                    upsert: true,
+                    new: true,
+                    setDefaultsOnInsert: true
+                }
+
+            );
+
+        }
+
+        // Total profile views count
+        const totalViews = await proflieViews.countDocuments({
+            profileid: profileUser._id
+        });
+
+        return res.status(200).json({
+            status: true,
+            data: profileUser,
+       totalViews
+            
+        });
+
     } catch (error) {
-        console.log(error)
-        return res.status(505).json({ "error": "Internal server error", status: false })
+
+        console.log(error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
 
     }
 
-
-
-})
+});
 authRouter.get('/view-profile-account', fetchuer, async (req, res) => {
+
   try {
 
     const finduser = await User
@@ -216,6 +254,13 @@ authRouter.get('/view-profile-account', fetchuer, async (req, res) => {
         }
       },
 
+      // Latest viewers first
+      {
+        $sort: {
+          updatedAt: -1
+        }
+      },
+
       {
         $lookup: {
           from: 'users',
@@ -231,17 +276,21 @@ authRouter.get('/view-profile-account', fetchuer, async (req, res) => {
 
       {
         $project: {
+
           _id: 1,
+
           profileid: 1,
-          createdAt: 1,
+
+          // THIS is correct profile view time
+          viewedAt: '$updatedAt',
 
           viewer: {
             _id: '$viewer._id',
             fullname: '$viewer.fullname',
             email: '$viewer.email',
-            time: '$viewer.updatedAt',
-            proflie_url: '$viewer.image_url',
+            profile_url: '$viewer.image_url'
           }
+
         }
       }
 
@@ -249,10 +298,13 @@ authRouter.get('/view-profile-account', fetchuer, async (req, res) => {
 
     res.status(200).json({
       success: true,
+      totalViews: useridview.length,
       useridview
     });
 
   } catch (err) {
+
+    console.log(err);
 
     res.status(500).json({
       success: false,
@@ -260,5 +312,6 @@ authRouter.get('/view-profile-account', fetchuer, async (req, res) => {
     });
 
   }
+
 });
 export default authRouter;
