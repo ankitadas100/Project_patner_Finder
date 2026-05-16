@@ -89,7 +89,7 @@ authRouter.post("/register", upload.single('profilepic'), async (req, res) => {
             skill,
             githublink,
             linkedinlink,
-            protfolio:protfolio,
+            protfolio: protfolio,
             password: haspass
         })
         await newuser.save();
@@ -215,8 +215,8 @@ authRouter.get("/getuserprofile/:id", fetchuer, async (req, res) => {
         return res.status(200).json({
             status: true,
             data: profileUser,
-       totalViews
-            
+            totalViews
+
         });
 
     } catch (error) {
@@ -233,85 +233,127 @@ authRouter.get("/getuserprofile/:id", fetchuer, async (req, res) => {
 });
 authRouter.get('/view-profile-account', fetchuer, async (req, res) => {
 
-  try {
+    try {
 
-    const finduser = await User
-      .findOne({ email: req.email })
-      .select("-password");
+        const finduser = await User
+            .findOne({ email: req.email })
+            .select("-password");
 
-    if (!finduser) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found"
-      });
+        if (!finduser) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        const useridview = await proflieViews.aggregate([
+
+            {
+                $match: {
+                    profileid: finduser._id
+                }
+            },
+
+            // Latest viewers first
+            {
+                $sort: {
+                    updatedAt: -1
+                }
+            },
+
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'whoviewid',
+                    foreignField: '_id',
+                    as: 'viewer'
+                }
+            },
+
+            {
+                $unwind: '$viewer'
+            },
+
+            {
+                $project: {
+
+                    _id: 1,
+
+                    profileid: 1,
+
+                    // THIS is correct profile view time
+                    viewedAt: '$updatedAt',
+
+                    viewer: {
+                        _id: '$viewer._id',
+                        fullname: '$viewer.fullname',
+                        email: '$viewer.email',
+                        profile_url: '$viewer.image_url'
+                    }
+
+                }
+            }
+
+        ]);
+
+        res.status(200).json({
+            success: true,
+            totalViews: useridview.length,
+            useridview
+        });
+
+    } catch (err) {
+
+        console.log(err);
+
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+
     }
 
-    const useridview = await proflieViews.aggregate([
-
-      {
-        $match: {
-          profileid: finduser._id
-        }
-      },
-
-      // Latest viewers first
-      {
-        $sort: {
-          updatedAt: -1
-        }
-      },
-
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'whoviewid',
-          foreignField: '_id',
-          as: 'viewer'
-        }
-      },
-
-      {
-        $unwind: '$viewer'
-      },
-
-      {
-        $project: {
-
-          _id: 1,
-
-          profileid: 1,
-
-          // THIS is correct profile view time
-          viewedAt: '$updatedAt',
-
-          viewer: {
-            _id: '$viewer._id',
-            fullname: '$viewer.fullname',
-            email: '$viewer.email',
-            profile_url: '$viewer.image_url'
-          }
-
-        }
-      }
-
-    ]);
-
-    res.status(200).json({
-      success: true,
-      totalViews: useridview.length,
-      useridview
-    });
-
-  } catch (err) {
-
-    console.log(err);
-
-    res.status(500).json({
-      success: false,
-      message: err.message
-    });
-
-  }
-
 });
+
+authRouter.post('/update-profile-photo', fetchuer, upload.single('image'), async (req, res) => {
+    try {
+
+
+        let imgurl = ""
+        if (req.file) {
+            const cloudinaryResponse = await cloudinary.uploader.upload(req.file.path, {
+                folder: "user_profiles", // Optional folder in Cloudinary
+            });
+            fs.unlinkSync(req.file.path);
+            imgurl = cloudinaryResponse.secure_url;
+        }
+        const finduser = await User
+            .findOne({ email: req.email })
+            .select("-password");
+
+        if (!finduser) {
+            return res.status(404).json({
+                status: false,
+                message: "User not found"
+            });
+        }
+        await User.findByIdAndUpdate(finduser._id, { $set: { image_url: imgurl } }, { new: true })
+        return res.status(200).json({
+            status: true,
+            message: "User not found"
+
+        })
+    } catch (error) {
+        console.log(err);
+
+       return res.status(500).json({
+            success: false,
+            message: err.message
+        });
+
+    }
+
+
+
+})
 export default authRouter;

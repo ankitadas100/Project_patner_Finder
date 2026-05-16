@@ -2,15 +2,15 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useUserData } from "../context/UserdataContext";
 import secureLocalStorage from 'react-secure-storage';
 import { useAuth } from '../context/AuthContext';
-import { 
-  User, 
-  Mail, 
-  Building, 
-  Link as LinkIcon, 
-  Github, 
-  Linkedin, 
-  Eye, 
-  Save, 
+import {
+  User,
+  Mail,
+  Building,
+  Link as LinkIcon,
+  Github,
+  Linkedin,
+  Eye,
+  Save,
   Loader2,
   AlertCircle,
   Clock,
@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router';
 import '../styles/accountSettings.css'
+import { handleError, handleSuccess } from '../Components/ErrorMessage';
 // --- NORMAL CSS ---
 const customStyles = `
 
@@ -39,27 +40,27 @@ const formatTimeAgo = (dateString) => {
   const diffInDays = Math.floor(diffInHours / 24);
   if (diffInDays === 1) return "Yesterday";
   if (diffInDays < 30) return `${diffInDays} days ago`;
-  
+
   return date.toLocaleDateString();
 };
 
 export default function AccountSetting() {
   const { useralldata } = useUserData();
   const { user } = useAuth();
-  
+
   // File Upload Ref
   const fileInputRef = useRef(null);
-  
+
   // State
   const [viewers, setViewers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // Image Upload State
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     fullname: '',
     collagename: '',
@@ -67,7 +68,7 @@ export default function AccountSetting() {
     githublink: '',
     linkedinlink: '',
     protfolio: '',
-    skill: '' 
+    skill: ''
   });
 
   // Sync context data to local form state once it loads
@@ -80,7 +81,7 @@ export default function AccountSetting() {
         githublink: useralldata.githublink || '',
         linkedinlink: useralldata.linkedinlink || '',
         protfolio: useralldata.protfolio || '',
-        skill: useralldata.skill ? useralldata.skill.join(', ') : '' 
+        skill: useralldata.skill ? useralldata.skill.join(', ') : ''
       });
       // Set initial avatar if exists
       if (useralldata.image_url) {
@@ -115,7 +116,7 @@ export default function AccountSetting() {
 
         const data = await response.json();
         if (data.success) {
-          const sortedViews = data.useridview.sort((a, b) => 
+          const sortedViews = data.useridview.sort((a, b) =>
             new Date(b.viewedAt) - new Date(a.viewedAt)
           );
           console.log(sortedViews)
@@ -168,36 +169,57 @@ export default function AccountSetting() {
       // Create FormData to send to your backend
       const uploadData = new FormData();
       uploadData.append('image', file);
+      const token = await user?.getIdToken();
+      const localtoken = secureLocalStorage.getItem('auth-token');
 
-      // TODO: Replace this with your actual image upload API call
-      // Example:
-      // const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/upload-avatar`;
-      // const response = await fetch(url, { method: "POST", headers: {...}, body: uploadData });
-      // const data = await response.json();
-      
+      let headers = {};
+      if (localtoken) {
+        headers["auth-token"] = localtoken;
+      } else if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      } else {
+        setIsUploadingAvatar(false);
+        return;
+      }
+
+      const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/update-profile-photo`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: headers,
+        body: uploadData
+      });
+      const data = await response.json();
+
       console.log("Uploading file:", file.name);
-      
+      if (data.status) {
+
+        handleSuccess("Profile photo update Successful")
+        window.location.reload();
+      }
+      if (!data.status) {
+        return handleError("Server issur try again")
+      }
       // Simulating network request delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       // alert("Photo uploaded successfully!");
-      
+
     } catch (err) {
       console.error("Failed to upload image", err);
-      alert("Failed to upload photo. Please try again.");
+      handleError("Failed to upload photo. Please try again.");
       // Revert to original if failed
       setAvatarPreview(useralldata?.image_url);
     } finally {
       setIsUploadingAvatar(false);
       // Clean up the object URL to avoid memory leaks
       URL.revokeObjectURL(objectUrl);
+
     }
   };
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setIsSaving(true);
-    
+
     try {
       const formattedSkills = formData.skill
         .split(',')
@@ -211,10 +233,10 @@ export default function AccountSetting() {
 
       // TODO: Replace with your actual update API call
       console.log("Submitting Profile Payload:", payload);
-      
+
       await new Promise(resolve => setTimeout(resolve, 1500));
       alert("Profile updated successfully!");
-      
+
     } catch (err) {
       console.error(err);
       alert("Failed to update profile.");
@@ -227,14 +249,14 @@ export default function AccountSetting() {
     <>
       <style>{customStyles}</style>
       <div className="settings-container">
-        
+
         <header className="page-header">
           <h1 className="page-title">Account <span className="highlight">Settings</span></h1>
           <p className="page-subtitle">Manage your public profile and see who is viewing your account.</p>
         </header>
 
         <div className="settings-layout">
-          
+
           {/* Left Column: Profile Update Form */}
           <div className="settings-card">
             <div className="card-header">
@@ -243,7 +265,7 @@ export default function AccountSetting() {
             </div>
 
             <div className="profile-avatar-section">
-              
+
               {/* Avatar Upload Container */}
               <div className="avatar-upload-container" onClick={handleAvatarClick}>
                 {avatarPreview ? (
@@ -253,7 +275,7 @@ export default function AccountSetting() {
                     {useralldata?.fullname?.charAt(0) || 'U'}
                   </div>
                 )}
-                
+
                 {/* Hover Overlay */}
                 <div className="avatar-overlay">
                   <Camera size={24} />
@@ -267,12 +289,12 @@ export default function AccountSetting() {
                 )}
 
                 {/* Hidden File Input */}
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  onChange={handleFileChange} 
-                  accept="image/png, image/jpeg, image/jpg, image/webp" 
-                  style={{ display: 'none' }} 
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  accept="image/png, image/jpeg, image/jpg, image/webp"
+                  style={{ display: 'none' }}
                 />
               </div>
 
@@ -287,17 +309,17 @@ export default function AccountSetting() {
 
             <form onSubmit={handleUpdateProfile}>
               <div className="form-grid">
-                
+
                 <div className="form-group full-width">
                   <label className="form-label">Full Name</label>
                   <div className="input-wrapper">
                     <User size={18} className="input-icon" />
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       name="fullname"
                       value={formData.fullname}
                       onChange={handleInputChange}
-                      className="form-input" 
+                      className="form-input"
                       placeholder="Enter your full name"
                     />
                   </div>
@@ -307,11 +329,11 @@ export default function AccountSetting() {
                   <label className="form-label">Email Address (Read Only)</label>
                   <div className="input-wrapper">
                     <Mail size={18} className="input-icon" />
-                    <input 
-                      type="email" 
-                      value={useralldata?.email || ''} 
-                      className="form-input" 
-                      disabled 
+                    <input
+                      type="email"
+                      value={useralldata?.email || ''}
+                      className="form-input"
+                      disabled
                     />
                   </div>
                 </div>
@@ -320,12 +342,12 @@ export default function AccountSetting() {
                   <label className="form-label">College / University</label>
                   <div className="input-wrapper">
                     <Building size={18} className="input-icon" />
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       name="collagename"
                       value={formData.collagename}
                       onChange={handleInputChange}
-                      className="form-input" 
+                      className="form-input"
                       placeholder="Where do you study?"
                     />
                   </div>
@@ -333,22 +355,22 @@ export default function AccountSetting() {
 
                 <div className="form-group full-width">
                   <label className="form-label">Bio</label>
-                  <textarea 
+                  <textarea
                     name="bio"
                     value={formData.bio}
                     onChange={handleInputChange}
-                    className="form-input" 
+                    className="form-input"
                     placeholder="Tell us a little about yourself..."
                   />
                 </div>
 
                 <div className="form-group full-width">
                   <label className="form-label">Skills (Comma separated)</label>
-                  <textarea 
+                  <textarea
                     name="skill"
                     value={formData.skill}
                     onChange={handleInputChange}
-                    className="form-input" 
+                    className="form-input"
                     style={{ minHeight: '60px' }}
                     placeholder="e.g. React, Node.js, Python, MongoDB"
                   />
@@ -358,12 +380,12 @@ export default function AccountSetting() {
                   <label className="form-label">GitHub Link</label>
                   <div className="input-wrapper">
                     <Github size={18} className="input-icon" />
-                    <input 
-                      type="url" 
+                    <input
+                      type="url"
                       name="githublink"
                       value={formData.githublink}
                       onChange={handleInputChange}
-                      className="form-input" 
+                      className="form-input"
                       placeholder="https://github.com/yourusername"
                     />
                   </div>
@@ -373,12 +395,12 @@ export default function AccountSetting() {
                   <label className="form-label">LinkedIn Link</label>
                   <div className="input-wrapper">
                     <Linkedin size={18} className="input-icon" />
-                    <input 
-                      type="url" 
+                    <input
+                      type="url"
                       name="linkedinlink"
                       value={formData.linkedinlink}
                       onChange={handleInputChange}
-                      className="form-input" 
+                      className="form-input"
                       placeholder="https://linkedin.com/in/yourusername"
                     />
                   </div>
@@ -388,12 +410,12 @@ export default function AccountSetting() {
                   <label className="form-label">Portfolio Website</label>
                   <div className="input-wrapper">
                     <LinkIcon size={18} className="input-icon" />
-                    <input 
-                      type="url" 
+                    <input
+                      type="url"
                       name="protfolio"
                       value={formData.protfolio}
                       onChange={handleInputChange}
-                      className="form-input" 
+                      className="form-input"
                       placeholder="https://yourwebsite.com"
                     />
                   </div>
@@ -401,7 +423,7 @@ export default function AccountSetting() {
 
               </div>
 
-              <button type="submit" className="btn-primary" disabled={isSaving}>
+              <button type="submit" className="btn-primary-a" disabled={isSaving}>
                 {isSaving ? <Loader2 size={18} className="spin" /> : <Save size={18} />}
                 {isSaving ? 'Saving Changes...' : 'Update Profile'}
               </button>
@@ -431,12 +453,12 @@ export default function AccountSetting() {
               <div className="viewer-list">
                 {viewers.map((view) => {
                   const isCurrentUser = view.viewer._id === useralldata?._id;
-                  
+
                   return (
                     <div key={view._id} className="viewer-item">
-                     <Link to={`/profile/${view.viewer._id}`}> <div className="viewer-initials">
+                      <Link to={`/profile/${view.viewer._id}`}> <div className="viewer-initials">
                         {/* {console.log(view)}` */}
-                       <img style={{width:'50px', height:'50px', borderRadius:'100%', objectFit:'cover',cursor:'pointer'}} src={`${view.viewer.profile_url}`} alt="profile pic" />
+                        <img style={{ width: '50px', height: '50px', borderRadius: '100%', objectFit: 'cover', cursor: 'pointer' }} src={`${view.viewer.profile_url}`} alt="profile pic" />
                       </div></Link>
                       <div className="viewer-info">
                         <p className="viewer-name">
