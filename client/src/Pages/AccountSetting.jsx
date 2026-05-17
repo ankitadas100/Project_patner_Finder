@@ -89,8 +89,8 @@ const formatTimeAgo = (dateString) => {
   return date.toLocaleDateString();
 };
 
-export default function AccountSetting() {
-  const { useralldata } = useUserData();
+export default function AccountSetting({setUpdate}) {
+  const { useralldata,setUseralldata } = useUserData();
   const { user } = useAuth();
 
   // File Upload Ref
@@ -320,6 +320,7 @@ export default function AccountSetting() {
       if(!data.status){
         return handleError(data.message)
       }
+      setUpdate(true)
       return handleSuccess("Profile updated successfully!"); 
 
 

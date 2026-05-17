@@ -31,7 +31,9 @@ function App() {
   const {localuser}=useAuth();
   const { setUseralldata } = useUserData();
   const [Isloginuser, setIsIsloginuser] = useState(false)
+  const [update,setUpdate]=useState(null)
   useEffect(() => {
+    setUpdate(null)
     const CheckUserLogin = async () => {
       setIsIsloginuser(false)
       try {
@@ -74,7 +76,7 @@ function App() {
       CheckUserLogin();
     
     
-  }, [user,localuser])
+  }, [user,localuser,update])
   if (!Isloginuser)
     return (
       <LoadingScreen />
@@ -96,7 +98,7 @@ function App() {
           <Route path='/viewallprojectrequirment' element={<ViewAllProjectRequirment/>}/>
           <Route path='/application' element={<UserApplication/>}/>
           <Route path='/post' element={<Post/>}/>
-          <Route path='/accountsettings' element={<AccountSetting/>}/>
+          <Route path='/accountsettings' element={<AccountSetting setUpdate={setUpdate}/>}/>
           <Route path='/post/hackthon' element={<PostHackthon/>}/>
           <Route path='/post/project' element={<PostProject/>}/>
           <Route path='/profile/:id' element={<Profile/>}/>
