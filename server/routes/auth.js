@@ -356,4 +356,7 @@ authRouter.post('/update-profile-photo', fetchuer, upload.single('image'), async
 
 
 })
+authRouter.post('/update-user-data',fetchuer,async(req,res)=>{
+    const {fullname,collagename,bio,skill,githublink,linkedinlink,protfolio}=req.body;
+})
 export default authRouter;

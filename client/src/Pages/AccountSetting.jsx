@@ -25,6 +25,51 @@ const customStyles = `
 
 `;
 
+// ── Skills Tag Input ──────────────────────────────────────────────────────────
+function SkillsInput({ value, onChange }) {
+  const [inputVal, setInputVal] = useState("");
+  const [focused, setFocused] = useState(false);
+  const addTags = (raw) => {
+    const parts = raw.split(",").map((t) => t.trim()).filter(Boolean);
+    const next = [...new Set([...value, ...parts])];
+    onChange(next);
+    setInputVal("");
+  };
+
+  const handleKey = (e) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      if (inputVal.trim()) addTags(inputVal);
+    } else if (e.key === "Backspace" && !inputVal && value.length > 0) {
+      onChange(value.slice(0, -1));
+    }
+  };
+
+  const removeTag = (i) => onChange(value.filter((_, idx) => idx !== i));
+
+  return (
+    <div
+      className={`tag-wrap${focused ? " focused" : ""}`}
+      onClick={(e) => e.currentTarget.querySelector("input").focus()}
+    >
+      {value.map((tag, i) => (
+        <span key={i} className="chip">
+          {tag}
+          <button className="chip-x" type="button" onClick={() => removeTag(i)}>×</button>
+        </span>
+      ))}
+      <input
+        className="tag-input-inner"
+        value={inputVal}
+        placeholder={value.length === 0 ? "Add skills — press Enter or comma , Like - c++, Java," : ""}
+        onChange={(e) => setInputVal(e.target.value)}
+        onKeyDown={handleKey}
+        onFocus={() => setFocused(true)}
+        onBlur={() => { setFocused(false); if (inputVal.trim()) addTags(inputVal); }}
+      />
+    </div>
+  );
+}
 // --- HELPER FUNCTION ---
 const formatTimeAgo = (dateString) => {
   if (!dateString) return "";
@@ -68,7 +113,7 @@ export default function AccountSetting() {
     githublink: '',
     linkedinlink: '',
     protfolio: '',
-    skill: ''
+    skill:[]
   });
 
   // Sync context data to local form state once it loads
@@ -81,7 +126,7 @@ export default function AccountSetting() {
         githublink: useralldata.githublink || '',
         linkedinlink: useralldata.linkedinlink || '',
         protfolio: useralldata.protfolio || '',
-        skill: useralldata.skill ? useralldata.skill.join(', ') : ''
+        skill: useralldata.skill || []
       });
       // Set initial avatar if exists
       if (useralldata.image_url) {
@@ -97,7 +142,6 @@ export default function AccountSetting() {
       try {
         const token = await user?.getIdToken();
         const localtoken = secureLocalStorage.getItem('auth-token');
-
         let headers = { "Content-Type": "application/json" };
         if (localtoken) {
           headers["auth-token"] = localtoken;
@@ -131,8 +175,8 @@ export default function AccountSetting() {
         setLoading(false);
       }
     };
-
-    if (user) {
+ const localtoken = secureLocalStorage.getItem('auth-token');
+    if (user || localtoken ) {
       fetchUserAccountViewData();
     }
   }, [user]);
@@ -365,16 +409,12 @@ export default function AccountSetting() {
                 </div>
 
                 <div className="form-group full-width">
-                  <label className="form-label">Skills (Comma separated)</label>
-                  <textarea
-                    name="skill"
-                    value={formData.skill}
-                    onChange={handleInputChange}
-                    className="form-input"
-                    style={{ minHeight: '60px' }}
-                    placeholder="e.g. React, Node.js, Python, MongoDB"
-                  />
-                </div>
+                <label className="form-label11">Skills</label>
+                <SkillsInput
+                  value={formData.skill}
+                  onChange={(skill) => setFormData((p) => ({ ...p, skill }))}
+                />
+              </div>
 
                 <div className="form-group">
                   <label className="form-label">GitHub Link</label>

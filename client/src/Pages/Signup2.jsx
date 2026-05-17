@@ -149,7 +149,7 @@ export default function Signup2() {
 
   const { email } = useEmail();
   const [errors, setErrors] = useState({});
-  const [Image,setImage]=useState(null)
+  const [Image, setImage] = useState(null)
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -239,7 +239,7 @@ export default function Signup2() {
       //     // Note: form.profilePic is available here if your backend needs it!
       //   })
       // });
-  
+
       console.log(res.data)
       setLoading(false);
       setSubmitted(true);
