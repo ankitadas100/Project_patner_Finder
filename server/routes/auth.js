@@ -344,11 +344,11 @@ authRouter.post('/update-profile-photo', fetchuer, upload.single('image'), async
 
         })
     } catch (error) {
-        console.log(err);
+        console.log(error);
 
-       return res.status(500).json({
+        return res.status(500).json({
             success: false,
-            message: err.message
+            message: error.message
         });
 
     }
@@ -356,7 +356,27 @@ authRouter.post('/update-profile-photo', fetchuer, upload.single('image'), async
 
 
 })
-authRouter.post('/update-user-data',fetchuer,async(req,res)=>{
-    const {fullname,collagename,bio,skill,githublink,linkedinlink,protfolio}=req.body;
+authRouter.post('/update-user-data', fetchuer, async (req, res) => {
+    try {
+        console.log(req.body);
+        const finduser = await User
+            .findOne({ email: req.email })
+            .select("-password");
+
+        if (!finduser) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        await User.findByIdAndUpdate(finduser._id, { $set: req.body }, { new: true })
+        return res.status(200).json({ status: true, "msg": "Profile update Successful" })
+    } catch (error) {
+        return res.status(500).json({
+            status: false,
+            message: error.message
+        });
+    }
 })
 export default authRouter;

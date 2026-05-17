@@ -113,7 +113,7 @@ export default function AccountSetting() {
     githublink: '',
     linkedinlink: '',
     protfolio: '',
-    skill:[]
+    skill: []
   });
 
   // Sync context data to local form state once it loads
@@ -175,8 +175,8 @@ export default function AccountSetting() {
         setLoading(false);
       }
     };
- const localtoken = secureLocalStorage.getItem('auth-token');
-    if (user || localtoken ) {
+    const localtoken = secureLocalStorage.getItem('auth-token');
+    if (user || localtoken) {
       fetchUserAccountViewData();
     }
   }, [user]);
@@ -265,30 +265,72 @@ export default function AccountSetting() {
     setIsSaving(true);
 
     try {
-      const formattedSkills = formData.skill
-        .split(',')
-        .map(s => s.trim())
-        .filter(s => s !== '');
+      const payload = {};
 
-      const payload = {
-        ...formData,
-        skill: formattedSkills
-      };
+      // 1. Compare standard string fields
+      const stringFields = ['fullname', 'collagename', 'bio', 'githublink', 'linkedinlink', 'protfolio'];
+      stringFields.forEach(field => {
+        const originalValue = useralldata[field] || '';
+        if (formData[field] !== originalValue) {
+          payload[field] = formData[field];
+        }
+      });
+
+      // 2. Compare the 'skill' array
+      // Using JSON.stringify is a quick and safe way to compare arrays of strings
+      const originalSkills = useralldata.skill || [];
+      if (JSON.stringify(formData.skill) !== JSON.stringify(originalSkills)) {
+        payload.skill = formData.skill;
+      }
+
+      // 3. Prevent API call if nothing was changed
+      if (Object.keys(payload).length === 0) {
+        setIsSaving(false);
+        // Optional: show a toast message that no changes were detected
+        handleSuccess("No changes made to update.");
+        return;
+      }
+
+      console.log("Submitting Profile Payload (Only Changed Data):", payload);
 
       // TODO: Replace with your actual update API call
-      console.log("Submitting Profile Payload:", payload);
+      const token = await user?.getIdToken();
+      const localtoken = secureLocalStorage.getItem('auth-token');
 
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      alert("Profile updated successfully!");
+      let headers = {"Content-Type": "application/json"};
+      if (localtoken) {
+        headers["auth-token"] = localtoken;
+      } else if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      } else {
+        return;
+      }
+
+
+      
+      const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/update-user-data`;
+      const res = await fetch(url,
+        {
+          method: "POST",
+          headers: headers,
+          body: JSON.stringify(payload)
+        }
+      )
+      const data = await res.json();
+      if(!data.status){
+        return handleError(data.message)
+      }
+      return handleSuccess("Profile updated successfully!"); 
+
+
 
     } catch (err) {
       console.error(err);
-      alert("Failed to update profile.");
+      handleError("Failed to update profile.");
     } finally {
       setIsSaving(false);
     }
   };
-
   return (
     <>
       <style>{customStyles}</style>
@@ -409,12 +451,12 @@ export default function AccountSetting() {
                 </div>
 
                 <div className="form-group full-width">
-                <label className="form-label11">Skills</label>
-                <SkillsInput
-                  value={formData.skill}
-                  onChange={(skill) => setFormData((p) => ({ ...p, skill }))}
-                />
-              </div>
+                  <label className="form-label11">Skills</label>
+                  <SkillsInput
+                    value={formData.skill}
+                    onChange={(skill) => setFormData((p) => ({ ...p, skill }))}
+                  />
+                </div>
 
                 <div className="form-group">
                   <label className="form-label">GitHub Link</label>
