@@ -226,8 +226,8 @@ export default function ViewAllProjectRequirment() {
             <div className="fade-in-up">
               <div className="hero-section">
                 <h2 className="hero-title">
-                  Find the <span className="hero-highlight">All Post</span><br />
-                  For Your Project
+                  DISCOVER YOUR <span className="hero-highlight">NEXT BUILD TEAM</span><br />
+                 
                 </h2>
                 <p className="hero-subtitle">
                   Connect with developers, designers, and innovators looking for their next great project.
