@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { Link } from "react-router-dom";
 import Works from './Works'
 import PopularSkills from './About'
 
@@ -106,8 +107,10 @@ export default function Home() {
           </p>
 
           <div className="hero-btns">
-            <button className="btn-primary">Post Your Project</button>
-            <button className="btn-glass">Find a Partner</button>
+            <Link to="/ViewAllProjectRequirment">
+            <button className="btn-primary">Post Your Project</button></Link>
+              <Link to="/viewallhackthonrequirment">
+            <button className="btn-glass">Find a Partner</button></Link>
           </div>
 
           <div className="hero-features">

@@ -226,11 +226,11 @@ export default function ViewAllProjectRequirment() {
             <div className="fade-in-up">
               <div className="hero-section">
                 <h2 className="hero-title">
-                  Find the <span className="hero-highlight">All Post</span><br />
-                  For Your Project
+                  DISCOVER YOUR <span className="hero-highlight">NEXT BUILD TEAM</span><br />
+                 
                 </h2>
                 <p className="hero-subtitle">
-                  Browse open requirements, connect with talented people, and build amazing projects together. Your next big thing starts here.
+                  Connect with developers, designers, and innovators looking for their next great project.
                 </p>
               </div>
 
@@ -269,7 +269,7 @@ export default function ViewAllProjectRequirment() {
                       </div>
 
                       <button className="card-btn" onClick={() => handleViewDetails(project)}>
-                        View Details
+                        CONNECT NOW 
                         <ChevronRight size={16} />
                       </button>
                     </div>
@@ -375,7 +375,7 @@ export default function ViewAllProjectRequirment() {
           <div className="modal-content fade-in-up">
 
             <div className="modal-header">
-              <h3 className="modal-title">Apply for Partner</h3>
+              <h3 className="modal-title">JOIN THE TEAM</h3>
               <button className="modal-close" onClick={handleCloseModal}>
                 <X size={20} />
               </button>

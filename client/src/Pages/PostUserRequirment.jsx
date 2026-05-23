@@ -426,7 +426,7 @@ export default function Requirment() {
                 ⚡ COLLAB PLATFORM
               </div>
               <h1 style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)", fontWeight: 800, background: "linear-gradient(135deg, #FFC300, #FF7A00)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", marginBottom: "0.75rem", lineHeight: 1.2 }}>
-                Find Your Dream Team
+               Find Your Perfect Collaboration Team
               </h1>
               <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "1rem", maxWidth: "480px", margin: "0 auto" }}>
                 Post your requirement and get matched with the right people — fast.
@@ -441,8 +441,8 @@ export default function Requirment() {
               style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", maxWidth: "700px", margin: "0 auto 2.5rem" }}
             >
               {[
-                { id: "hackathon", icon: "⚡", title: "Find Partner for Hackathon", desc: "Build a dream team for your next hackathon challenge" },
-                { id: "project", icon: "🚀", title: "Find Partner for Project", desc: "Collaborate on side projects, startups & open source" },
+                { id: "hackathon", icon: "⚡", title: "Hack Team Finder", desc: "Build a dream team for your next hackathon challenge" },
+                { id: "project", icon: "🚀", title: "Project Partnership", desc: "Collaborate on side projects, startups & open source" },
               ].map(opt => (
                 <button
                   key={opt.id}
