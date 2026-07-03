@@ -352,9 +352,6 @@ authRouter.post('/update-profile-photo', fetchuer, upload.single('image'), async
         });
 
     }
-
-
-
 })
 authRouter.post('/update-user-data', fetchuer, async (req, res) => {
     try {
