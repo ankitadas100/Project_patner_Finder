@@ -95,13 +95,6 @@ requirmentWorkRouter.delete('/delete-project/:id', fetchuer, async (req, res) =>
             });
         }
 
-        // Security check
-        // if (project.user.toString() !== req.uid) {
-        //   return res.status(403).json({
-        //     success: false,
-        //     message: 'Unauthorized'
-        //   });
-        // }
 
         // Delete all related applications
         await userApplication.deleteMany({
@@ -140,15 +133,6 @@ requirmentWorkRouter.delete('/delete-hackthon/:id', fetchuer, async (req, res) =
                 message: 'Project not found'
             });
         }
-
-        // Security check
-        // if (project.user.toString() !== req.uid) {
-        //   return res.status(403).json({
-        //     success: false,
-        //     message: 'Unauthorized'
-        //   });
-        // }
-
         // Delete all related applications
         await userApplication.deleteMany({
             eventId: req.params.id,
